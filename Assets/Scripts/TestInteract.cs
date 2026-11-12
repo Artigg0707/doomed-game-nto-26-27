@@ -9,7 +9,7 @@ public class TestInteract : MonoBehaviour, IInteractable
     }
     public void Interact()
     {
-        Debug.Log("Успех! Объект отреагировал на нажатие E.");
+        Debug.Log(1);
     }
 
     // Update is called once per frame
