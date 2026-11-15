@@ -5,12 +5,13 @@ using System.Collections.Generic;
 public class CharaterObject : ScriptableObject
 {
     public List<Stati> availableStats;
-    public List<disease> availableDiseases;
-    //public List<Trait> availableTraits;   - когда сделаю черты
-
+    //public List<disease> availableDiseases;
+    public List<Trait> availableTraits;
+    
     public int minAge;
     public int maxAge;
-    
+    public List<Sprite> avObliks = new List<Sprite>();
+    //public string appearanceText;
 
 
     //public int minDiseases = 0;

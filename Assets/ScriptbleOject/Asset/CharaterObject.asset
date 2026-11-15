@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: CharaterObject
   m_EditorClassIdentifier: Assembly-CSharp::CharaterObject
   availableStats: []
-  availableDiseases: []
-  minAge: 0
-  maxAge: 0
-  minDiseases: 0
-  maxDiseases: 0
+  availableTraits: []
+  minAge: 15
+  maxAge: 60
+  Oblik: {fileID: 0}
   namePool: {fileID: 0}

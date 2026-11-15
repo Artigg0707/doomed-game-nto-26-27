@@ -9,12 +9,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f70cd1379eea0684a9f7fb88fece0f89, type: 3}
-  m_Name: Hungry
-  m_EditorClassIdentifier: Assembly-CSharp::HiddenStatDefinition
+  m_Script: {fileID: 11500000, guid: a7d421148e6679540a06291bd5a8b7d3, type: 3}
+  m_Name: morale
+  m_EditorClassIdentifier: Assembly-CSharp::Stati
+  icon: {fileID: 0}
   statName: 
   statDesc: 
+  statColor: {r: 0, g: 0, b: 0, a: 0}
   minValue: 0
   maxValue: 0
-  isMnozhitel: 0
-  linkStat: {fileID: 0}
+  minDefaultValue: 0
+  maxDefaultValue: 0
+  baseDecayPerDay: 0
