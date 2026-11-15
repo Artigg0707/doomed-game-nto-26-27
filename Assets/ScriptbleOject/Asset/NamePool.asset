@@ -12,7 +12,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd83b4a28a31ef24b8a25c38aab7f16b, type: 3}
   m_Name: NamePool
   m_EditorClassIdentifier: Assembly-CSharp::NamePool
-  maleNames: []
-  maleLastNames: []
-  femaleNames: []
-  femaleLastNames: []
+  maleNames:
+  - Александр
+  - Дмитрий
+  - Сергей
+  - Андрей
+  - Алексей
+  - Иван
+  - Максим
+  - Евгений
+  - Владимир
+  - Николай
+  maleLastNames:
+  - Иванов
+  - Петров
+  - Сидоров
+  - Кузнецов
+  - Попов
+  - Смирнов
+  - Волков
+  - Михайлов
+  - Новиков
+  - Федоров
+  femaleNames:
+  - Елена
+  - Ольга
+  - Анна
+  - Мария
+  - Татьяна
+  - Наталья
+  - Екатерина
+  - Светлана
+  - Юлия
+  - Анастасия
+  femaleLastNames:
+  - Иванова
+  - Петрова
+  - Сидорова
+  - Кузнецова
+  - Попова
+  - Смирнова
+  - Волкова
+  - Михайлова
+  - Новикова
+  - Федорова
