@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: health
   m_EditorClassIdentifier: Assembly-CSharp::Stati
   icon: {fileID: 0}
-  statName: 
+  statName: "\u0417\u0434\u043E\u0440\u043E\u0432\u044C\u0435"
   statDesc: 
   statColor: {r: 0, g: 0, b: 0, a: 0}
   minValue: 0
-  maxValue: 0
-  minDefaultValue: 0
-  maxDefaultValue: 0
+  maxValue: 100
+  minDefaultValue: 75
+  maxDefaultValue: 100
   baseDecayPerDay: 0

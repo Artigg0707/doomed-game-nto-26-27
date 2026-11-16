@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-
+[System.Serializable]
 public class GeneratedCharacter
 {
     // Пол
@@ -8,17 +8,17 @@ public class GeneratedCharacter
     {
         Male, Female
     }
-    public Gender gender;
+    [SerializeField]public Gender gender;
     
-    public string fullName;
-    public int age;
-    public Sprite portrait;
+    [SerializeField]public string fullName;
+    [SerializeField]public int age;
+    [SerializeField]public Sprite portrait;
     
-    public Dictionary<Stati, float> stats = new Dictionary<Stati, float>();
+    [SerializeField]public Dictionary<Stati, float> stats = new Dictionary<Stati, float>();
     
-    public List<Trait> traits = new List<Trait>();
+    [SerializeField]public List<Trait> traits = new List<Trait>();
     
-    public string description;
+    [SerializeField]public string description;
     
-    public bool isRevealed = false;
+    [SerializeField]public bool isRevealed = false;
 }

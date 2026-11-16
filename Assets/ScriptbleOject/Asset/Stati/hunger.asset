@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: hunger
   m_EditorClassIdentifier: Assembly-CSharp::Stati
   icon: {fileID: 0}
-  statName: 
+  statName: "\u0413\u043E\u043B\u043E\u0434"
   statDesc: 
   statColor: {r: 0, g: 0, b: 0, a: 0}
   minValue: 0
-  maxValue: 0
-  minDefaultValue: 0
-  maxDefaultValue: 0
+  maxValue: 100
+  minDefaultValue: 75
+  maxDefaultValue: 100
   baseDecayPerDay: 0

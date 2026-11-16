@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: morale
   m_EditorClassIdentifier: Assembly-CSharp::Stati
   icon: {fileID: 0}
-  statName: 
+  statName: "\u041C\u043E\u0440\u0430\u043B\u044C"
   statDesc: 
   statColor: {r: 0, g: 0, b: 0, a: 0}
   minValue: 0
-  maxValue: 0
-  minDefaultValue: 0
-  maxDefaultValue: 0
+  maxValue: 100
+  minDefaultValue: 75
+  maxDefaultValue: 100
   baseDecayPerDay: 0

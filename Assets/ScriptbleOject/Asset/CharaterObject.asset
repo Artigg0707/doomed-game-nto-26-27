@@ -12,9 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feb7ef101690ed347ab2f7c9d35e5bec, type: 3}
   m_Name: CharaterObject
   m_EditorClassIdentifier: Assembly-CSharp::CharaterObject
-  availableStats: []
+  availableStats:
+  - {fileID: 11400000, guid: fa94755c6d3a8184991dfe25dc915801, type: 2}
+  - {fileID: 11400000, guid: 1cd47984bd6909249b589298fc7f34f5, type: 2}
+  - {fileID: 11400000, guid: 83ef1dfd6f3fad24b83985336b4dff40, type: 2}
+  - {fileID: 11400000, guid: 3e3a101811800f740977bcd1f4e4acf2, type: 2}
   availableTraits: []
   minAge: 15
   maxAge: 60
-  Oblik: {fileID: 0}
-  namePool: {fileID: 0}
+  avObliks: []
+  namePool: {fileID: 11400000, guid: 628cbe606cea02b4a8954444beb2d1e6, type: 2}
