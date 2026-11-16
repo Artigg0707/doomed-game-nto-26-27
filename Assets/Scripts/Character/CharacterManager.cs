@@ -4,11 +4,16 @@ using UnityEngine;
 public class CharacterManager : MonoBehaviour
 {
     public CharacterGenerator genCgaracter;
-    
     public List<GeneratedCharacter> characters = new List<GeneratedCharacter>();
 
-    
-    
+    [Header("Доска")]
+    [SerializeField] private CharacterCardUI cardPrefab;
+    [SerializeField] private RectTransform cardContainer;
+
+    [SerializeField] private float edgePadding = 10f;
+    [SerializeField] private float cardSpacing = 12f;
+    [SerializeField] private int positionAttempts = 80;
+
     public void genList()
     {
         for (int i = 0; i < 5; i++)
@@ -16,15 +21,151 @@ public class CharacterManager : MonoBehaviour
             CreateCharacter();
         }
     }
-    
+
+    // Используй этот метод, если кнопка должна создавать одного персонажа.
+    public void CreateOneFromButton()
+    {
+        CreateCharacter();
+    }
+
     public GeneratedCharacter CreateCharacter()
     {
-        GeneratedCharacter newCharacter = genCgaracter.Generate();
-        characters.Add(newCharacter);
+        if (genCgaracter == null)
+        {
+            Debug.LogError("В CharacterManager не назначен CharacterGenerator.", this);
+            return null;
+        }
 
-        Debug.Log("Создан персонаж: " + newCharacter.fullName +
-                  ", возраст: " + newCharacter.age);
+        if (genCgaracter.profile == null)
+        {
+            Debug.LogError("В CharacterGenerator не назначен CharaterObject в поле Profile.", this);
+            return null;
+        }
+
+        GeneratedCharacter newCharacter = genCgaracter.Generate();
+
+        if (newCharacter == null)
+            return null;
+
+        characters.Add(newCharacter);
+        CreateCard(newCharacter);
 
         return newCharacter;
+    }
+
+    private void CreateCard(GeneratedCharacter character)
+    {
+        if (cardPrefab == null)
+        {
+            Debug.LogError("В CharacterManager не назначен Card Prefab.", this);
+            return;
+        }
+
+        if (cardContainer == null)
+        {
+            Debug.LogError("В CharacterManager не назначен Card Container.", this);
+            return;
+        }
+
+        CharacterCardUI card = Instantiate(cardPrefab, cardContainer, false);
+
+        RectTransform cardRect = card.GetComponent<RectTransform>();
+        cardRect.anchorMin = new Vector2(0.5f, 0.5f);
+        cardRect.anchorMax = new Vector2(0.5f, 0.5f);
+        cardRect.pivot = new Vector2(0.5f, 0.5f);
+        cardRect.localScale = Vector3.one;
+
+        card.Setup(character);
+        card.transform.SetAsLastSibling();
+
+        if (TryFindPosition(cardRect, out Vector2 position))
+        {
+            cardRect.anchoredPosition3D = new Vector3(position.x, position.y, 0f);
+        }
+        else
+        {
+            cardRect.anchoredPosition3D = Vector3.zero;
+            Debug.LogWarning("На доске не нашлось свободного места для карточки.", this);
+        }
+    }
+
+    private bool TryFindPosition(RectTransform newCard, out Vector2 position)
+    {
+        position = Vector2.zero;
+
+        Rect area = cardContainer.rect;
+
+        float halfWidth = newCard.rect.width * 0.5f;
+        float halfHeight = newCard.rect.height * 0.5f;
+
+        float minX = area.xMin + halfWidth + edgePadding;
+        float maxX = area.xMax - halfWidth - edgePadding;
+        float minY = area.yMin + halfHeight + edgePadding;
+        float maxY = area.yMax - halfHeight - edgePadding;
+
+        if (minX > maxX || minY > maxY)
+            return false;
+
+        CharacterCardUI[] cards = cardContainer.GetComponentsInChildren<CharacterCardUI>(true);
+
+        for (int attempt = 0; attempt < positionAttempts; attempt++)
+        {
+            Vector2 candidate = new Vector2(
+                Random.Range(minX, maxX),
+                Random.Range(minY, maxY)
+            );
+
+            Rect candidateBounds = GetPaddedBounds(
+                newCard,
+                candidate
+            );
+
+            bool overlaps = false;
+
+            foreach (CharacterCardUI otherCard in cards)
+            {
+                if (otherCard == null || otherCard.transform == newCard.transform)
+                    continue;
+
+                RectTransform otherRect = otherCard.GetComponent<RectTransform>();
+
+                if (otherRect == null)
+                    continue;
+
+                Rect otherBounds = GetPaddedBounds(
+                    otherRect,
+                    otherRect.anchoredPosition
+                );
+
+                if (candidateBounds.Overlaps(otherBounds))
+                {
+                    overlaps = true;
+                    break;
+                }
+            }
+
+            if (!overlaps)
+            {
+                position = candidate;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private Rect GetPaddedBounds(RectTransform rectTransform, Vector2 center)
+    {
+        float padding = cardSpacing * 0.5f;
+
+        float width = rectTransform.rect.width + padding * 2f;
+        float height = rectTransform.rect.height + padding * 2f;
+
+        return new Rect(
+            center.x - width * 0.5f,
+            center.y - height * 0.5f,
+            width,
+            height
+        );
     }
 }
