@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class CharacterGenerator : MonoBehaviour
 {
-    [Header("Шаблон")]
+    [Header("пїЅпїЅпїЅпїЅпїЅпїЅ")]
     public CharaterObject profile;
 
     public GeneratedCharacter Generate()
@@ -35,7 +35,7 @@ public class CharacterGenerator : MonoBehaviour
         }
         else
         {
-            character.fullName = "Безымянный";
+            character.fullName = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
         }
 
         character.age = Random.Range(profile.minAge, profile.maxAge + 1);
@@ -50,11 +50,10 @@ public class CharacterGenerator : MonoBehaviour
             character.portrait = null;
         }
 
-        foreach (Stati stat in profile.availableStats)
-        {
-            float value = Random.Range(stat.minDefaultValue, stat.maxDefaultValue);
-            character.stats[stat] = value;
-        }
+        character.health = 100;
+        character.morale = 100;
+        character.daysWithoutFood = 0;
+        character.daysWithoutWater = 0;
 
         if (profile.availableTraits != null && profile.availableTraits.Count > 0)
         {
