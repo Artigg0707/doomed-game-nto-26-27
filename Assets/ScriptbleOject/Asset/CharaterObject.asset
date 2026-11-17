@@ -20,5 +20,7 @@ MonoBehaviour:
   availableTraits: []
   minAge: 15
   maxAge: 60
-  avObliks: []
+  avObliks:
+  - {fileID: -6362907454686395223, guid: ea72b6cf03c45004b84537f401dc70a6, type: 3}
+  - {fileID: 1787433143995992622, guid: 013423d8671429042ba54bd3ce72a683, type: 3}
   namePool: {fileID: 11400000, guid: 628cbe606cea02b4a8954444beb2d1e6, type: 2}
