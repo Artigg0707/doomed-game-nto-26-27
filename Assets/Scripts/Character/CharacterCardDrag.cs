@@ -25,7 +25,7 @@ public class CharacterCardDrag : MonoBehaviour,
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        // Новый клик: сбрасываем результат предыдущего перетаскивания.
+        // РЎР±СЂР°СЃС‹РІР°РµРј РїСЂРёР·РЅР°Рє РїРµСЂРµС‚Р°СЃРєРёРІР°РЅРёСЏ РїРµСЂРµРґ РЅР°Р¶Р°С‚РёРµРј РЅР° РєР°СЂС‚РѕС‡РєСѓ.
         WasDragged = false;
     }
 
@@ -35,7 +35,7 @@ public class CharacterCardDrag : MonoBehaviour,
 
         if (dragArea == null)
         {
-            Debug.LogError("У карточки должен быть родитель с RectTransform.", this);
+            Debug.LogError("Р’ СЂРѕРґРёС‚РµР»Рµ РєР°СЂС‚РѕС‡РєРё РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ RectTransform.", this);
             return;
         }
 

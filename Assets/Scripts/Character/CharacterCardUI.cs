@@ -10,12 +10,12 @@ public class CharacterCardUI : MonoBehaviour,
     IPointerDownHandler,
     IPointerUpHandler
 {
-    [Header("Карточка")]
+    [Header("Р’РёР·СѓР°Р» РєР°СЂС‚РѕС‡РєРё")]
     [SerializeField] private Image cardBackground;
     [SerializeField] private Image portraitImage;
     [SerializeField] private TMP_Text nameText;
 
-    [Header("Подсветка")]
+    [Header("Р¦РІРµС‚Р° СЃРѕСЃС‚РѕСЏРЅРёСЏ")]
     [SerializeField] private Color hoverColor =
         new Color(1f, 0.85f, 0.55f, 1f);
 

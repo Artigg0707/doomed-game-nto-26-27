@@ -6,7 +6,9 @@ public class CharacterManager : MonoBehaviour
     public CharacterGenerator genCgaracter;
     public List<GeneratedCharacter> characters = new List<GeneratedCharacter>();
 
-    [Header("Доска")]
+    public event System.Action OnRationsChanged;
+
+    [Header("РљР°СЂС‚РѕС‡РєРё РїРµСЂСЃРѕРЅР°Р¶РµР№")]
     [SerializeField] private CharacterCardUI cardPrefab;
     [SerializeField] private RectTransform cardContainer;
 
@@ -17,13 +19,17 @@ public class CharacterManager : MonoBehaviour
 
     public void genList()
     {
+        // reset available portraits so each skin is used only once across the batch
+        if (genCgaracter != null)
+            genCgaracter.ResetAvailablePortraits();
+
         for (int i = 0; i < 5; i++)
         {
             CreateCharacter();
         }
     }
 
-    // Используй этот метод, если кнопка должна создавать одного персонажа.
+    // РЎРѕР·РґР°С‘С‚ РѕРґРЅРѕРіРѕ РїРµСЂСЃРѕРЅР°Р¶Р° Рё РµРіРѕ РєР°СЂС‚РѕС‡РєСѓ РїРѕ РєРЅРѕРїРєРµ.
     public void CreateOneFromButton()
     {
         CreateCharacter();
@@ -33,13 +39,13 @@ public class CharacterManager : MonoBehaviour
     {
         if (genCgaracter == null)
         {
-            Debug.LogError("В CharacterManager не назначен CharacterGenerator.", this);
+            Debug.LogError("Р’ CharacterManager РЅРµ РЅР°Р·РЅР°С‡РµРЅ CharacterGenerator.", this);
             return null;
         }
 
         if (genCgaracter.profile == null)
         {
-            Debug.LogError("В CharacterGenerator не назначен CharaterObject в поле Profile.", this);
+            Debug.LogError("Р’ CharacterGenerator РЅРµ РЅР°Р·РЅР°С‡РµРЅ CharaterObject РІ РїРѕР»Рµ Profile.", this);
             return null;
         }
 
@@ -54,17 +60,105 @@ public class CharacterManager : MonoBehaviour
         return newCharacter;
     }
 
+    public bool SetFoodRation(GeneratedCharacter character, bool receivesFood)
+    {
+        if (!CanChangeRation(character))
+            return false;
+
+        if (character.receivesFoodToday == receivesFood)
+            return true;
+
+        if (receivesFood)
+        {
+            if (ResourceManager.Instance == null ||
+                !ResourceManager.Instance.ConsumeFood(1))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (ResourceManager.Instance != null)
+                ResourceManager.Instance.AddFood(1);
+        }
+
+        character.receivesFoodToday = receivesFood;
+        OnRationsChanged?.Invoke();
+        return true;
+    }
+
+    public bool SetWaterRation(GeneratedCharacter character, bool receivesWater)
+    {
+        if (!CanChangeRation(character))
+            return false;
+
+        if (character.receivesWaterToday == receivesWater)
+            return true;
+
+        if (receivesWater)
+        {
+            if (ResourceManager.Instance == null ||
+                !ResourceManager.Instance.ConsumeWater(1))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (ResourceManager.Instance != null)
+                ResourceManager.Instance.AddWater(1);
+        }
+
+        character.receivesWaterToday = receivesWater;
+        OnRationsChanged?.Invoke();
+        return true;
+    }
+
+    public void ResetDailyRations()
+    {
+        foreach (GeneratedCharacter character in characters)
+        {
+            if (character == null)
+                continue;
+
+            character.receivesFoodToday = false;
+            character.receivesWaterToday = false;
+        }
+
+        OnRationsChanged?.Invoke();
+    }
+
+    public void SetAllFoodRations(bool receivesFood)
+    {
+        foreach (GeneratedCharacter character in characters)
+            SetFoodRation(character, receivesFood);
+    }
+
+    public void SetAllWaterRations(bool receivesWater)
+    {
+        foreach (GeneratedCharacter character in characters)
+            SetWaterRation(character, receivesWater);
+    }
+
+    private bool CanChangeRation(GeneratedCharacter character)
+    {
+        return character != null &&
+               !character.isDead &&
+               !character.isExiled &&
+               characters.Contains(character);
+    }
+
     private void CreateCard(GeneratedCharacter character)
     {
         if (cardPrefab == null)
         {
-            Debug.LogError("В CharacterManager не назначен Card Prefab.", this);
+            Debug.LogError("Р’ CharacterManager РЅРµ РЅР°Р·РЅР°С‡РµРЅ РїСЂРµС„Р°Р± РєР°СЂС‚РѕС‡РєРё.", this);
             return;
         }
 
         if (cardContainer == null)
         {
-            Debug.LogError("В CharacterManager не назначен Card Container.", this);
+            Debug.LogError("Р’ CharacterManager РЅРµ РЅР°Р·РЅР°С‡РµРЅ РєРѕРЅС‚РµР№РЅРµСЂ РєР°СЂС‚РѕС‡РµРє.", this);
             return;
         }
 
@@ -86,7 +180,7 @@ public class CharacterManager : MonoBehaviour
         else
         {
             cardRect.anchoredPosition3D = Vector3.zero;
-            Debug.LogWarning("На доске не нашлось свободного места для карточки.", this);
+            Debug.LogWarning("РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё СЃРІРѕР±РѕРґРЅРѕРµ РјРµСЃС‚Рѕ РґР»СЏ РєР°СЂС‚РѕС‡РєРё РїРµСЂСЃРѕРЅР°Р¶Р°.", this);
         }
     }
 

@@ -45,14 +45,14 @@ public class Trait : ScriptableObject
     {
         public EffectType effectType;
 
-        [Tooltip("Значение эффекта. Например, 25 или -10. Для эффектов без числа не используется.")]
+        [Tooltip("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, 25 пїЅпїЅпїЅ -10. пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.")]
         public float value;
 
-        [Tooltip("Используется только для CannotGoOnExpeditionToLocation. Нумерация локаций начинается с 1.")]
+        [Tooltip("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ CannotGoOnExpeditionToLocation. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 1.")]
         public int locationNumber = 3;
     }
 
-    [Header("Описание")]
+    [Header("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ")]
     public string traitName;
 
     [TextArea(2, 5)]
@@ -60,9 +60,9 @@ public class Trait : ScriptableObject
 
     public Sprite traitSprite;
 
-    [Header("Категория")]
+    [Header("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ")]
     public TraitCategory category;
 
-    [Header("Эффекты")]
+    [Header("пїЅпїЅпїЅпїЅпїЅпїЅпїЅ")]
     public List<TraitEffect> effects = new List<TraitEffect>();
 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-[CreateAssetMenu(fileName = "CharaterObject", menuName = "Scriptable Objects/шаблон перса")]
+[CreateAssetMenu(fileName = "CharaterObject", menuName = "Scriptable Objects/РџСЂРѕС„РёР»СЊ РїРµСЂСЃРѕРЅР°Р¶РµР№")]
 public class CharaterObject : ScriptableObject
 {
     public List<Stati> availableStats;
@@ -10,7 +10,8 @@ public class CharaterObject : ScriptableObject
     
     public int minAge;
     public int maxAge;
-    public List<Sprite> avObliks = new List<Sprite>();
+    public List<Sprite> maleObliks = new List<Sprite>();
+    public List<Sprite> femaleObliks = new List<Sprite>();
     //public string appearanceText;
 
 

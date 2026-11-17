@@ -1,0 +1,178 @@
+using UnityEngine;
+using System;
+
+public class ResourceManager : MonoBehaviour
+{
+    public static ResourceManager Instance { get; private set; }
+
+    public ResourceData resourceData;
+
+    public int FoodCans => resourceData != null ? resourceData.foodCans : 0;
+    public int WaterBottles => resourceData != null ? resourceData.waterBottles : 0;
+    public int FuelCans => resourceData != null ? resourceData.fuelCans : 0;
+    public int TemperatureLevel => resourceData != null ? resourceData.temperatureLevel : 0;
+    public bool GeneratorBroken => resourceData != null && resourceData.generatorBroken;
+
+    public event Action OnResourcesChanged;
+
+    private const int MinResourceCount = 0;
+    private const int MaxTemperatureLevel = 3;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+
+        if (resourceData == null)
+            resourceData = new ResourceData();
+
+        resourceData.currentDay = 0;
+        resourceData.foodCans = UnityEngine.Random.Range(8, 11);
+        resourceData.waterBottles = UnityEngine.Random.Range(8, 11);
+        resourceData.fuelCans = UnityEngine.Random.Range(4, 7);
+        resourceData.temperatureLevel = 3;
+        resourceData.generatorBroken = false;
+
+        OnResourcesChanged?.Invoke();
+    }
+
+    public bool ConsumeFood(int amount)
+    {
+        if (resourceData == null)
+            return false;
+
+        return Consume(ref resourceData.foodCans, amount);
+    }
+
+    public bool ConsumeWater(int amount)
+    {
+        if (resourceData == null)
+            return false;
+
+        return Consume(ref resourceData.waterBottles, amount);
+    }
+
+    public bool ConsumeFuel(int amount)
+    {
+        if (resourceData == null)
+            return false;
+
+        return Consume(ref resourceData.fuelCans, amount);
+    }
+
+    public void AddFood(int amount)
+    {
+        if (resourceData == null)
+            return;
+
+        Add(ref resourceData.foodCans, amount);
+    }
+
+    public void AddWater(int amount)
+    {
+        if (resourceData == null)
+            return;
+
+        Add(ref resourceData.waterBottles, amount);
+    }
+
+    public void AddFuel(int amount)
+    {
+        if (resourceData == null)
+            return;
+
+        Add(ref resourceData.fuelCans, amount);
+    }
+
+    public void SetTemperature(int level)
+    {
+        if (resourceData == null)
+            return;
+
+        resourceData.temperatureLevel = Math.Clamp(level, MinResourceCount, MaxTemperatureLevel);
+        OnResourcesChanged?.Invoke();
+    }
+
+    public void AddTemperature(int amount)
+    {
+        if (resourceData == null)
+            return;
+
+        SetTemperature(resourceData.temperatureLevel + amount);
+    }
+
+    public void BreakGenerator()
+    {
+        if (resourceData == null)
+            return;
+
+        if (resourceData.generatorBroken)
+            return;
+
+        resourceData.generatorBroken = true;
+        OnResourcesChanged?.Invoke();
+    }
+
+    public void RepairGenerator()
+    {
+        if (resourceData == null)
+            return;
+
+        if (!resourceData.generatorBroken)
+            return;
+
+        resourceData.generatorBroken = false;
+        OnResourcesChanged?.Invoke();
+    }
+
+    private bool Consume(ref int resource, int amount)
+    {
+        if (resourceData == null || amount < 0)
+            return false;
+
+        if (resource < amount)
+            return false;
+
+        resource -= amount;
+        OnResourcesChanged?.Invoke();
+        return true;
+    }
+
+    private void Add(ref int resource, int amount)
+    {
+        if (resourceData == null || amount < 0)
+            return;
+
+        resource = resource + amount;
+        OnResourcesChanged?.Invoke();
+    }
+
+    [Obsolete("Use ConsumeFood instead.")]
+    public void addFood(int amount)
+    {
+        ConsumeFood(amount);
+    }
+
+    [Obsolete("Use ConsumeWater instead.")]
+    public void addWater(int amount)
+    {
+        ConsumeWater(amount);
+    }
+
+    [Obsolete("Use ConsumeFuel instead.")]
+    public void addFuel(int amount)
+    {
+        ConsumeFuel(amount);
+    }
+
+    [Obsolete("Use BreakGenerator instead.")]
+    public void BrokeGenerator()
+    {
+        BreakGenerator();
+    }
+}

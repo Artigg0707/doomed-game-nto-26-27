@@ -4,30 +4,33 @@ using UnityEngine.UI;
 
 public class CharacterBioPanelUI : MonoBehaviour
 {
-    [Header("Основная информация")]
+    [Header("РћСЃРЅРѕРІРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ")]
     [SerializeField] private TMP_Text characterNameText;
     [SerializeField] private Image portraitImage;
     [SerializeField] private TMP_Text ageAndGenderText;
     [SerializeField] private TMP_Text descriptionText;
 
-    [Header("Здоровье")]
+    [Header("Р—РґРѕСЂРѕРІСЊРµ")]
     [SerializeField] private Slider healthSlider;
     [SerializeField] private TMP_Text healthValueText;
 
-    [Header("Мораль")]
+    [Header("РњРѕСЂР°Р»СЊ")]
     [SerializeField] private Slider moraleSlider;
     [SerializeField] private TMP_Text moraleValueText;
 
-    [Header("Статусы выживания")]
+    [Header("РЎС‚Р°С‚СѓСЃС‹ РІС‹Р¶РёРІР°РЅРёСЏ")]
     [SerializeField] private TMP_Text daysWithoutFoodText;
     [SerializeField] private TMP_Text daysWithoutWaterText;
 
-    [Header("Особенность")]
+    [Header("Р Р°С†РёРѕРЅС‹ РЅР° СЃРµРіРѕРґРЅСЏ")]
+    [SerializeField] private TMP_Text rationStatusText;
+
+    [Header("Р§РµСЂС‚Р° РїРµСЂСЃРѕРЅР°Р¶Р°")]
     [SerializeField] private Image traitIcon;
     [SerializeField] private TMP_Text traitNameText;
     [SerializeField] private TMP_Text traitDescriptionText;
 
-    [Header("Статус персонажа")]
+    [Header("РЎС‚Р°С‚СѓСЃ РїРµСЂСЃРѕРЅР°Р¶Р°")]
     [SerializeField] private TMP_Text statusText;
 
     public void ShowCharacter(GeneratedCharacter character)
@@ -47,16 +50,16 @@ public class CharacterBioPanelUI : MonoBehaviour
         }
 
         string genderText = character.gender == GeneratedCharacter.Gender.Male
-            ? "Мужчина"
-            : "Женщина";
+            ? "РњСѓР¶С‡РёРЅР°"
+            : "Р–РµРЅС‰РёРЅР°";
 
         if (ageAndGenderText != null)
-            ageAndGenderText.text = $"Возраст: {character.age} • {genderText}";
+            ageAndGenderText.text = $"Р’РѕР·СЂР°СЃС‚: {character.age} В· {genderText}";
 
         if (descriptionText != null)
         {
             descriptionText.text = string.IsNullOrWhiteSpace(character.description)
-                ? "Описание пока не заполнено."
+                ? "РћРїРёСЃР°РЅРёРµ РїРµСЂСЃРѕРЅР°Р¶Р° РЅРµ Р·Р°РґР°РЅРѕ."
                 : character.description;
         }
 
@@ -81,10 +84,17 @@ public class CharacterBioPanelUI : MonoBehaviour
             moraleValueText.text = character.morale.ToString();
 
         if (daysWithoutFoodText != null)
-            daysWithoutFoodText.text = $"Дней без еды: {character.daysWithoutFood}";
+            daysWithoutFoodText.text = $"Р”РЅРµР№ Р±РµР· РµРґС‹: {character.daysWithoutFood}";
 
         if (daysWithoutWaterText != null)
-            daysWithoutWaterText.text = $"Дней без воды: {character.daysWithoutWater}";
+            daysWithoutWaterText.text = $"Р”РЅРµР№ Р±РµР· РІРѕРґС‹: {character.daysWithoutWater}";
+
+        if (rationStatusText != null)
+        {
+            string foodStatus = character.receivesFoodToday ? "Р•РґР°: РІС‹РґР°РЅР°" : "Р•РґР°: РЅРµ РІС‹РґР°РЅР°";
+            string waterStatus = character.receivesWaterToday ? "РІРѕРґР° РІС‹РґР°РЅР°" : "РІРѕРґР° РЅРµ РІС‹РґР°РЅР°";
+            rationStatusText.text = $"{foodStatus}; {waterStatus}";
+        }
 
         Trait trait = character.traits != null && character.traits.Count > 0
             ? character.traits[0]
@@ -97,7 +107,7 @@ public class CharacterBioPanelUI : MonoBehaviour
         }
 
         if (traitNameText != null)
-            traitNameText.text = trait != null ? trait.traitName : "Нет особенности";
+            traitNameText.text = trait != null ? trait.traitName : "РќРµС‚ С‡РµСЂС‚С‹";
 
         if (traitDescriptionText != null)
             traitDescriptionText.text = trait != null ? trait.traitDesc : "";
@@ -105,11 +115,11 @@ public class CharacterBioPanelUI : MonoBehaviour
         if (statusText != null)
         {
             if (character.isDead)
-                statusText.text = "Статус: мёртв";
+                statusText.text = "РЎС‚Р°С‚СѓСЃ: РјС‘СЂС‚РІ";
             else if (character.isExiled)
-                statusText.text = "Статус: изгнан";
+                statusText.text = "РЎС‚Р°С‚СѓСЃ: РёР·РіРЅР°РЅ";
             else
-                statusText.text = "Статус: жив";
+                statusText.text = "РЎС‚Р°С‚СѓСЃ: Р¶РёРІ";
         }
     }
 

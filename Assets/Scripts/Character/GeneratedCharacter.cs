@@ -23,6 +23,10 @@ public class GeneratedCharacter
     [SerializeField] public int daysWithoutFood = 0;
     [SerializeField] public int daysWithoutWater = 0;
 
+    [Header("Рационы на сегодня")]
+    [SerializeField] public bool receivesFoodToday = false;
+    [SerializeField] public bool receivesWaterToday = false;
+
     [Header("Состояние")]
     [SerializeField] public bool isDead = false;
     [SerializeField] public bool isExiled = false;
