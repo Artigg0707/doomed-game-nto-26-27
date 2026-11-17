@@ -1,17 +1,23 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class CharacterCardUI : MonoBehaviour
+public class CharacterCardUI : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] private Image portraitImage;
     [SerializeField] private TMP_Text nameText;
 
     public GeneratedCharacter Character { get; private set; }
 
-    public void Setup(GeneratedCharacter character)
+    private CharacterBioPanelUI bioPanel;
+
+    public void Setup(
+        GeneratedCharacter character,
+        CharacterBioPanelUI panel = null)
     {
         Character = character;
+        bioPanel = panel;
 
         if (character == null)
             return;
@@ -24,5 +30,11 @@ public class CharacterCardUI : MonoBehaviour
             portraitImage.sprite = character.portrait;
             portraitImage.enabled = character.portrait != null;
         }
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (Character != null && bioPanel != null)
+            bioPanel.ShowCharacter(Character);
     }
 }

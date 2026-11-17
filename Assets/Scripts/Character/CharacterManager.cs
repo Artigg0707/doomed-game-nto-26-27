@@ -13,6 +13,7 @@ public class CharacterManager : MonoBehaviour
     [SerializeField] private float edgePadding = 10f;
     [SerializeField] private float cardSpacing = 12f;
     [SerializeField] private int positionAttempts = 80;
+    [SerializeField] private CharacterBioPanelUI bioPanel;
 
     public void genList()
     {
@@ -75,7 +76,7 @@ public class CharacterManager : MonoBehaviour
         cardRect.pivot = new Vector2(0.5f, 0.5f);
         cardRect.localScale = Vector3.one;
 
-        card.Setup(character);
+        card.Setup(character, bioPanel);
         card.transform.SetAsLastSibling();
 
         if (TryFindPosition(cardRect, out Vector2 position))
