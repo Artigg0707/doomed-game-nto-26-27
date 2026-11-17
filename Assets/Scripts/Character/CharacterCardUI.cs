@@ -88,7 +88,7 @@ public class CharacterCardUI : MonoBehaviour,
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        // Если карточку двигали, не открываем биографию.
+        
         if (dragHandler != null && dragHandler.WasDragged)
             return;
 

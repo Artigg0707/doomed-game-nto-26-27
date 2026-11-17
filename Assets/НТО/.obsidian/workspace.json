@@ -23,12 +23,18 @@
             "id": "bee1a49cb38ef8df",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "kanban",
               "state": {
-                "file": "Drawing 2026-11-17 21.38.52.excalidraw.md"
+                "file": "Задачи/Задачи.md",
+                "kanbanViewState": {
+                  "kanban-plugin": "board",
+                  "list-collapse": [
+                    false
+                  ]
+                }
               },
-              "icon": "excalidraw-icon",
-              "title": "Drawing 2026-11-17 21.38.52.excalidraw"
+              "icon": "lucide-trello",
+              "title": "Задачи"
             }
           }
         ],
@@ -204,9 +210,9 @@
   },
   "active": "bee1a49cb38ef8df",
   "lastOpenFiles": [
+    "Drawing 2026-11-17 21.38.52.excalidraw.md",
     "Задачи/План реализации по шагам.md",
     "Задачи/Задачи.md",
-    "Drawing 2026-11-17 21.38.52.excalidraw.md",
     "Задачи/Заметка ResourceManager.md.meta",
     "Задачи/Заметка Система ивентов.md.meta",
     "Drawing 2026-11-17 21.38.52.excalidraw.md.meta",
