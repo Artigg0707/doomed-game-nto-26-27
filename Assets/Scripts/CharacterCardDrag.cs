@@ -3,6 +3,7 @@ using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(RectTransform))]
 public class CharacterCardDrag : MonoBehaviour,
+    IPointerDownHandler,
     IBeginDragHandler,
     IDragHandler,
     IEndDragHandler
@@ -15,33 +16,39 @@ public class CharacterCardDrag : MonoBehaviour,
     private Vector2 pointerOffset;
     private bool isDragging;
 
+    public bool WasDragged { get; private set; }
+
     private void Awake()
     {
         cardRect = GetComponent<RectTransform>();
     }
 
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        // Новый клик: сбрасываем результат предыдущего перетаскивания.
+        WasDragged = false;
+    }
+
     public void OnBeginDrag(PointerEventData eventData)
     {
-        // Карточка должна быть непосредственным ребёнком CardContainer.
         dragArea = cardRect.parent as RectTransform;
 
         if (dragArea == null)
         {
-            Debug.LogError("Родитель карточки должен быть UI-объектом с RectTransform.", this);
+            Debug.LogError("У карточки должен быть родитель с RectTransform.", this);
             return;
         }
 
         if (!TryGetPointerPosition(eventData, out Vector2 pointerPosition))
             return;
 
+        WasDragged = true;
+        isDragging = true;
+
         Vector3 cardPosition = cardRect.localPosition;
         pointerOffset = new Vector2(cardPosition.x, cardPosition.y) - pointerPosition;
 
-        isDragging = true;
-
-        // Во время перетаскивания карточка будет поверх остальных карточек.
         cardRect.SetAsLastSibling();
-
         MoveCard(eventData);
     }
 
@@ -65,11 +72,13 @@ public class CharacterCardDrag : MonoBehaviour,
         if (!TryGetPointerPosition(eventData, out Vector2 pointerPosition))
             return;
 
-        Vector2 targetPosition = pointerPosition + pointerOffset;
-        targetPosition = ClampToBoard(targetPosition);
+        Vector2 targetPosition = ClampToBoard(pointerPosition + pointerOffset);
 
-        // Z = 0 оставляет карточку в плоскости CardContainer.
-        cardRect.localPosition = new Vector3(targetPosition.x, targetPosition.y, 0f);
+        cardRect.localPosition = new Vector3(
+            targetPosition.x,
+            targetPosition.y,
+            0f
+        );
     }
 
     private bool TryGetPointerPosition(
@@ -78,7 +87,6 @@ public class CharacterCardDrag : MonoBehaviour,
     {
         Camera eventCamera = eventData.pressEventCamera;
 
-        // Запасной вариант для World Space Canvas.
         if (eventCamera == null)
         {
             Canvas canvas = GetComponentInParent<Canvas>();
@@ -103,15 +111,17 @@ public class CharacterCardDrag : MonoBehaviour,
     {
         Rect boardRect = dragArea.rect;
 
-        float halfWidth = cardRect.rect.width * Mathf.Abs(cardRect.localScale.x) * 0.5f;
-        float halfHeight = cardRect.rect.height * Mathf.Abs(cardRect.localScale.y) * 0.5f;
+        float halfWidth =
+            cardRect.rect.width * Mathf.Abs(cardRect.localScale.x) * 0.5f;
+
+        float halfHeight =
+            cardRect.rect.height * Mathf.Abs(cardRect.localScale.y) * 0.5f;
 
         float minX = boardRect.xMin + halfWidth + edgePadding;
         float maxX = boardRect.xMax - halfWidth - edgePadding;
         float minY = boardRect.yMin + halfHeight + edgePadding;
         float maxY = boardRect.yMax - halfHeight - edgePadding;
 
-        // Если карточка больше области, ставим её по центру по этой оси.
         float x = minX > maxX
             ? boardRect.center.x
             : Mathf.Clamp(position.x, minX, maxX);
