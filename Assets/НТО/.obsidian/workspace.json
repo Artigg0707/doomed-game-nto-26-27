@@ -23,14 +23,12 @@
             "id": "bee1a49cb38ef8df",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "excalidraw",
               "state": {
-                "file": "Задачи/План реализации по шагам.md",
-                "mode": "source",
-                "source": false
+                "file": "Drawing 2026-11-17 21.38.52.excalidraw.md"
               },
-              "icon": "lucide-file",
-              "title": "План реализации по шагам"
+              "icon": "excalidraw-icon",
+              "title": "Drawing 2026-11-17 21.38.52.excalidraw"
             }
           }
         ],
@@ -206,6 +204,7 @@
   },
   "active": "bee1a49cb38ef8df",
   "lastOpenFiles": [
+    "Задачи/План реализации по шагам.md",
     "Задачи/Задачи.md",
     "Drawing 2026-11-17 21.38.52.excalidraw.md",
     "Задачи/Заметка ResourceManager.md.meta",
@@ -215,7 +214,6 @@
     "Задачи/Заметка DayCycleManager.md.meta",
     "Задачи/План реализации по шагам.md.meta",
     "Задачи/Заметка Доска персонажей.md.meta",
-    "Задачи/План реализации по шагам.md",
     "Заметка Доска персонажей.md.meta",
     "Заметка ResourceManager.md.meta",
     "Заметка DayCycleManager.md.meta",
