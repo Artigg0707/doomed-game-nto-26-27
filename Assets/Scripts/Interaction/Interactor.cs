@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 interface IInteractable
 {
@@ -26,38 +27,47 @@ public class Interactor : MonoBehaviour
         }
     }
 
-    void Update() 
+    void Update()
     {
         if (mainCamera == null) return;
+
         Ray r = mainCamera.ScreenPointToRay(Input.mousePosition);
         Debug.DrawRay(r.origin, r.direction * InteractRange, Color.red);
+
         IHighlightable targetHighlight = null;
-        
-        if (Physics.Raycast(r, out RaycastHit hitInfo, InteractRange)) 
+
+        bool pointerOverUI =
+            EventSystem.current != null &&
+            EventSystem.current.IsPointerOverGameObject();
+
+        if (!pointerOverUI &&
+            Physics.Raycast(r, out RaycastHit hitInfo, InteractRange))
         {
-            if (Input.GetMouseButtonDown(0)) 
+            if (Input.GetMouseButtonDown(0))
             {
-                if (hitInfo.collider.gameObject.TryGetComponent(out IInteractable interactObj)) 
+                if (hitInfo.collider.gameObject.TryGetComponent(
+                        out IInteractable interactObj))
                 {
                     interactObj.Interact();
                 }
             }
-            if (hitInfo.collider.gameObject.TryGetComponent(out IHighlightable highlightObj))
+
+            if (hitInfo.collider.gameObject.TryGetComponent(
+                    out IHighlightable highlightObj))
             {
                 targetHighlight = highlightObj;
             }
         }
+
         if (_currentHighlighted != targetHighlight)
         {
             if (_currentHighlighted != null)
-            {
-                _currentHighlighted.Highlight(false); 
-            }
+                _currentHighlighted.Highlight(false);
+
             _currentHighlighted = targetHighlight;
+
             if (_currentHighlighted != null)
-            {
-                _currentHighlighted.Highlight(true);  
-            }
+                _currentHighlighted.Highlight(true);
         }
     }
 }

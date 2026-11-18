@@ -6,7 +6,7 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
     public RationMenuUI rationMenu;
     private Material _outlineMaterial;
     public CinemachineCamera playerCamera;
-    public CinemachineCamera PCCamera;
+    public CinemachineCamera objCam;
     public float highlightValue = 1.1f; 
     public float normalValue = 0f;
     public string propertyName = "_OutlineSize";
@@ -27,25 +27,30 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
                 _outlineMaterial = mats[0];
             }
         }
-        PCCamera.Priority = 0;
+        objCam.Priority = 0;
     }
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.N))
         {
-            PCCamera.Priority = 0;
+            objCam.Priority = 0;
             _isInteracting = false;
             ApplyHighlightValue(normalValue);
         }
     }
     public void Interact()
     {
-        PCCamera.Priority = 20;
+        objCam.Priority = 20;
         _isInteracting = true;
         ApplyHighlightValue(normalValue);
 
         if (rationMenu != null)
             rationMenu.Open();
+    }
+    public void outCam()
+    {
+        objCam.Priority = 0;
+        
     }
     public void Highlight(bool state)
     {
