@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-public class RationMenuUI : MonoBehaviour
+public class RationMenuUI : MonoBehaviour, IOpenablePanel
 {
     [Header("Data")]
     [SerializeField] private CharacterManager characterManager;

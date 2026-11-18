@@ -31,7 +31,7 @@ public class ResourceManager : MonoBehaviour
         if (resourceData == null)
             resourceData = new ResourceData();
 
-        resourceData.currentDay = 0;
+        
         resourceData.foodCans = UnityEngine.Random.Range(8, 11);
         resourceData.waterBottles = UnityEngine.Random.Range(8, 11);
         resourceData.fuelCans = UnityEngine.Random.Range(4, 7);
