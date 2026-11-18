@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
 {
+    public RationMenuUI rationMenu;
     private Material _outlineMaterial;
     public CinemachineCamera playerCamera;
     public CinemachineCamera PCCamera;
@@ -42,6 +43,9 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
         PCCamera.Priority = 20;
         _isInteracting = true;
         ApplyHighlightValue(normalValue);
+
+        if (rationMenu != null)
+            rationMenu.Open();
     }
     public void Highlight(bool state)
     {

@@ -23,14 +23,18 @@
             "id": "bee1a49cb38ef8df",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "kanban",
               "state": {
-                "file": "Задачи/План реализации по шагам.md",
-                "mode": "source",
-                "source": false
+                "file": "Задачи/Задачи.md",
+                "kanbanViewState": {
+                  "kanban-plugin": "board",
+                  "list-collapse": [
+                    false
+                  ]
+                }
               },
-              "icon": "lucide-file",
-              "title": "План реализации по шагам"
+              "icon": "lucide-trello",
+              "title": "Задачи"
             }
           },
           {
@@ -106,8 +110,7 @@
               "title": "Закладки"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -127,7 +130,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Механники/Самая база/Игровой цикл.md",
+                "file": "Задачи/Задачи.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -202,7 +205,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
+    "width": 200,
     "collapsed": true
   },
   "left-ribbon": {
@@ -221,10 +224,11 @@
   },
   "active": "bee1a49cb38ef8df",
   "lastOpenFiles": [
-    "_Упрощенная_версия_игры_1.5_недели/01_Детальный_игровой_цикл.md",
-    "Задачи/План реализации по шагам.md",
+    "Задачи/Заметка Доска персонажей.md",
     "Задачи/Задачи.md",
     "Drawing 2026-11-17 21.38.52.excalidraw.md",
+    "Задачи/План реализации по шагам.md",
+    "_Упрощенная_версия_игры_1.5_недели/01_Детальный_игровой_цикл.md",
     "Задачи/Заметка ResourceManager.md.meta",
     "Задачи/Заметка Система ивентов.md.meta",
     "Drawing 2026-11-17 21.38.52.excalidraw.md.meta",
@@ -236,7 +240,6 @@
     "Заметка ResourceManager.md.meta",
     "Заметка DayCycleManager.md.meta",
     "Механники/Ресурсы/Вода.md",
-    "Задачи/Заметка Доска персонажей.md",
     "Механники/Самая база/Игровой цикл.md",
     "Задачи/Заметка Система ивентов.md",
     "Задачи/Заметка DayCycleManager.md",

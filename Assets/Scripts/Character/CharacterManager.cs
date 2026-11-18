@@ -11,28 +11,30 @@ public class CharacterManager : MonoBehaviour
     [Header("Карточки персонажей")]
     [SerializeField] private CharacterCardUI cardPrefab;
     [SerializeField] private RectTransform cardContainer;
+    [SerializeField, Min(0)] private int initialCharacterCount = 5;
 
     [SerializeField] private float edgePadding = 10f;
     [SerializeField] private float cardSpacing = 12f;
     [SerializeField] private int positionAttempts = 80;
     [SerializeField] private CharacterBioPanelUI bioPanel;
 
-    public void genList()
+    private void Start()
     {
-        // reset available portraits so each skin is used only once across the batch
+        GenerateInitialCharacters();
+    }
+
+    private void GenerateInitialCharacters()
+    {
+        if (characters.Count > 0)
+            return;
+
         if (genCgaracter != null)
             genCgaracter.ResetAvailablePortraits();
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < initialCharacterCount; i++)
         {
             CreateCharacter();
         }
-    }
-
-    // Создаёт одного персонажа и его карточку по кнопке.
-    public void CreateOneFromButton()
-    {
-        CreateCharacter();
     }
 
     public GeneratedCharacter CreateCharacter()
