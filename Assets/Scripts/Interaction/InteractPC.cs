@@ -56,18 +56,14 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
 
     public void Interact()
     {
-        // Сохраняем прежнее переключение Cinemachine, если камера назначена.
+        
         if (objCam != null)
             objCam.Priority = 20;
 
         _isInteracting = true;
         ApplyHighlightValue(normalValue);
 
-        if (panelToOpen == null)
-        {
-            Debug.LogWarning("В InteractPC не назначена панель.", this);
-            return;
-        }
+        
 
         if (panelToOpen.activeInHierarchy)
             return;
