@@ -88,55 +88,73 @@ public class DayCycleManager : MonoBehaviour
 
     private void UpdateSurvivalCounters(ResourceManager resources, CharacterManager cm, NightReportData report)
     {
+        int foodSpent = 0;
+        int waterSpent = 0;
+
         foreach (GeneratedCharacter character in cm.characters)
         {
             if (character == null || character.isDead || character.isExiled)
                 continue;
 
-            // Еда
+            // ---------- Еда ----------
             if (character.receivesFoodToday)
+            {
                 character.daysWithoutFood = 0;
+                foodSpent++;
+            }
             else
             {
                 character.daysWithoutFood++;
-                if (character.daysWithoutFood == 1)
-                {
-                    character.morale -= 10;
-                    report.survivalChanges.Add($"{character.fullName}: Голоден, мораль −10.");
-                }
-                else if (character.daysWithoutFood >= 2)
-                {
-                    character.health -= 25;
-                    character.morale -= 20;
-                    report.survivalChanges.Add($"{character.fullName}: Истощен, −25 HP, −20 мораль.");
-                    if (character.health <= 0)
-                    {
-                        character.isDead = true;
-                        report.deaths.Add(character.fullName);
-                    }
-                }
             }
 
-            // Вода
+            // ---------- Вода ----------
             if (character.receivesWaterToday)
+            {
                 character.daysWithoutWater = 0;
+                waterSpent++;
+            }
             else
             {
                 character.daysWithoutWater++;
-                if (character.daysWithoutWater == 1)
+            }
+
+            // ---------- Статус жителя (всегда добавляем в отчёт) ----------
+            string status = GetCharacterStatus(character);
+            report.survivalChanges.Add(status);
+
+            // ---------- Штрафы за голод/жажду/холод ----------
+            // Голод
+            if (character.daysWithoutFood == 1)
+            {
+                character.morale -= 10;
+                report.survivalChanges.Add($"  ↳ мораль −10 (голод 1 день)");
+            }
+            else if (character.daysWithoutFood >= 2)
+            {
+                character.health -= 25;
+                character.morale -= 20;
+                report.survivalChanges.Add($"  ↳ Истощен! −25 HP, −20 мораль.");
+                if (character.health <= 0)
                 {
-                    character.morale -= 15;
-                    report.survivalChanges.Add($"{character.fullName}: Жажда, мораль −15.");
+                    character.isDead = true;
+                    report.deaths.Add(character.fullName);
                 }
-                else if (character.daysWithoutWater >= 2)
+            }
+
+            // Жажда
+            if (character.daysWithoutWater == 1)
+            {
+                character.morale -= 15;
+                report.survivalChanges.Add($"  ↳ мораль −15 (жажда 1 день)");
+            }
+            else if (character.daysWithoutWater >= 2)
+            {
+                character.health -= 40;
+                report.survivalChanges.Add($"  ↳ Обезвоживание! −40 HP.");
+                if (character.health <= 0)
                 {
-                    character.health -= 40;
-                    report.survivalChanges.Add($"{character.fullName}: Обезвоживание, −40 HP.");
-                    if (character.health <= 0)
-                    {
-                        character.isDead = true;
-                        report.deaths.Add(character.fullName);
-                    }
+                    character.isDead = true;
+                    report.deaths.Add(character.fullName);
                 }
             }
 
@@ -145,7 +163,7 @@ public class DayCycleManager : MonoBehaviour
             {
                 int coldDamage = resources.TemperatureLevel == 0 ? 35 : 15;
                 character.health -= coldDamage;
-                report.survivalChanges.Add($"{character.fullName}: Мороз, −{coldDamage} HP.");
+                report.survivalChanges.Add($"  ↳ Мороз, −{coldDamage} HP.");
                 if (character.health <= 0)
                 {
                     character.isDead = true;
@@ -160,8 +178,21 @@ public class DayCycleManager : MonoBehaviour
         else
             report.resourceChanges.Add("Топлива не хватило. Обогрев отключён.");
 
-        report.resourceChanges.Add($"Еда в складе: {resources.FoodCans} банок.");
+        if (foodSpent > 0)
+            report.resourceChanges.Add($"Еды израсходовано: {foodSpent} банок.");
+        if (waterSpent > 0)
+            report.resourceChanges.Add($"Воды израсходовано: {waterSpent} бутылок.");
+
+        report.resourceChanges.Add($"Еда на складе: {resources.FoodCans} банок.");
         report.resourceChanges.Add($"Вода на складе: {resources.WaterBottles} бутылок.");
         report.resourceChanges.Add($"Температура: {resources.TemperatureLevel}/3.");
+    }
+
+    private string GetCharacterStatus(GeneratedCharacter c)
+    {
+        string foodState = c.daysWithoutFood == 0 ? "сыт" : $"без еды {c.daysWithoutFood} дн.";
+        string waterState = c.daysWithoutWater == 0 ? "напоен" : $"без воды {c.daysWithoutWater} дн.";
+        string healthState = c.health >= 75 ? "здоров" : (c.health >= 35 ? "ранен" : "при смерти");
+        return $"{c.fullName}: {foodState}, {waterState}, {c.health} HP, мораль {c.morale} ({healthState}).";
     }
 }

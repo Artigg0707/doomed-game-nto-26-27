@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using Unity.Cinemachine;
@@ -19,6 +20,8 @@ public class MorningReportPanel : MonoBehaviour
     [SerializeField] private CinemachineCamera playerCamera;
     [Tooltip("Базовый приоритет камеры игрока (обычно 10 или выше)")]
     [SerializeField] private int playerCameraBasePriority = 10;
+    [Header("Настройки комментариев коменданта")]
+    [SerializeField] private CommandantCommentSettings commentSettings;
 
     private Action _onContinue;
 
@@ -92,7 +95,7 @@ public class MorningReportPanel : MonoBehaviour
 
         sb.AppendLine();
 
-        // Состояние жителей (всегда показываем)
+        // Состояние жителей (всегда показываем всех)
         sb.AppendLine("Состояние жителей:");
         if (r.survivalChanges.Count > 0)
         {
@@ -101,7 +104,7 @@ public class MorningReportPanel : MonoBehaviour
         }
         else
         {
-            sb.AppendLine("► Все живы и здоровы, никто не пострадал.");
+            sb.AppendLine("► Нет жителей в бункере.");
         }
 
         // Смерти
@@ -113,6 +116,97 @@ public class MorningReportPanel : MonoBehaviour
         // Итоговая строка
         sb.AppendLine(r.GetSummaryLine());
 
+        sb.AppendLine();
+        sb.AppendLine("Заметка коменданта:");
+        sb.AppendLine("► " + GetCommandantComment(r));
+
         return sb.ToString();
+    }
+
+    private string GetCommandantComment(NightReportData r)
+    {
+        var hungry = new List<string>();
+        var thirsty = new List<string>();
+        var injured = new List<string>();
+        var dead = new List<string>(r.deaths);
+
+        foreach (var line in r.survivalChanges)
+        {
+            if (line.Contains("без еды"))
+            {
+                var name = line.Split(':')[0].Trim();
+                hungry.Add(name);
+            }
+            if (line.Contains("без воды"))
+            {
+                var name = line.Split(':')[0].Trim();
+                thirsty.Add(name);
+            }
+            if (line.Contains("HP,") && line.Contains("ранен"))
+            {
+                var name = line.Split(':')[0].Trim();
+                injured.Add(name);
+            }
+        }
+
+        if (commentSettings != null)
+        {
+            if (dead.Count > 0)
+                return FormatRandom(commentSettings.deathComments, string.Join(", ", dead), string.Join(", ", dead));
+
+            if (hungry.Count >= 2)
+                return FormatRandom(commentSettings.hungryComments, hungry[0], string.Join(", ", hungry));
+
+            if (thirsty.Count >= 2)
+                return FormatRandom(commentSettings.thirstyComments, thirsty[0], string.Join(", ", thirsty));
+
+            if (injured.Count > 0)
+                return FormatRandom(commentSettings.injuredComments, injured[0], string.Join(", ", injured));
+
+            if (hungry.Count == 1 && thirsty.Count == 1)
+                return FormatRandom(commentSettings.hungryAndThirstyComments, hungry[0], thirsty[0]);
+
+            if (hungry.Count == 1 || thirsty.Count == 1 || injured.Count == 1)
+            {
+                var name = hungry.Count > 0 ? hungry[0] : thirsty.Count > 0 ? thirsty[0] : injured[0];
+                return FormatRandom(commentSettings.loneComments, name);
+            }
+
+            return FormatRandom(commentSettings.calmComments);
+        }
+
+        if (dead.Count > 0)
+            return $"Вчера ушли {string.Join(", ", dead)}. Остальные выглядят так, будто сами скоро уйдут.";
+        if (hungry.Count >= 2)
+            return $"Сегодня в бункере взгляды слишком голодные. Лучше не оставлять {hungry[0]} одного с консервами.";
+        if (thirsty.Count >= 2)
+            return $"Вчерашняя ночь была сухой. {thirsty[0]} уже смотрит на канистру с тоской в глазах.";
+        if (injured.Count > 0)
+            return $"{injured[0]} хромает и хмурится. Будем надеяться, что до утра доживёт.";
+        if (hungry.Count == 1 && thirsty.Count == 1)
+            return $"{hungry[0]} голоден, а {thirsty[0]} хочет пить. Двоим было бы легче, но у нас что есть, что есть.";
+        if (hungry.Count == 1 || thirsty.Count == 1 || injured.Count == 1)
+        {
+            var name = hungry.Count > 0 ? hungry[0] : thirsty.Count > 0 ? thirsty[0] : injured[0];
+            return $"{name} выглядит так, будто сегодня ночью видел что-то странное в вентиляции.";
+        }
+
+        return "Все на месте. Надеюсь, завтра будет не хуже.";
+    }
+
+    private string FormatRandom(List<string> templates, params string[] args)
+    {
+        if (templates == null || templates.Count == 0)
+            return "Все на месте. Надеюсь, завтра будет не хуже.";
+
+        var template = templates[UnityEngine.Random.Range(0, templates.Count)];
+        var name = args.Length > 0 ? args[0] : "";
+        var names = args.Length > 1 ? args[1] : name;
+
+        return template
+            .Replace("{name}", name)
+            .Replace("{names}", names)
+            .Replace("{name1}", name)
+            .Replace("{name2}", args.Length > 1 ? args[1] : "");
     }
 }

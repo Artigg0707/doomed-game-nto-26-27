@@ -7,6 +7,7 @@ public class BedSleepTrigger : MonoBehaviour
     [Header("Ссылки")]
     [SerializeField] private MorningReportPanel morningReportPanel;
     [SerializeField] private CanvasGroup fadePanel;
+    [SerializeField] private CharacterManager characterManager;
 
     [Header("Настройки")]
     [SerializeField] private float fadeDuration = 1f;
@@ -88,19 +89,62 @@ public class BedSleepTrigger : MonoBehaviour
         // Показываем панель утренней сводки (всегда, даже если отчёт пустой)
         if (morningReportPanel != null)
         {
-            // Если отчёт не пришёл через событие, создаём минимальный
+            // Если отчёт не пришёл через событие, собираем данные напрямую
             if (_pendingReport == null)
             {
-                Debug.LogWarning("[BedSleepTrigger] Отчёт ночи не получен через событие, создаём базовый.");
+                Debug.LogWarning("[BedSleepTrigger] Отчёт ночи не получен через событие, собираем данные напрямую.");
+
+                ResourceManager resources = ResourceManager.Instance;
+                bool fuelConsumed = false; // мы не знаем, было ли израсходовано, если событие не пришло
+                int tempBefore = resources != null ? resources.TemperatureLevel : 3;
+                int tempAfter = resources != null ? resources.TemperatureLevel : 3;
+
                 _pendingReport = new NightReportData
                 {
                     completedDay = DayCycleManager.Instance.CurrentDay - 1,
                     newDay = DayCycleManager.Instance.CurrentDay,
-                    fuelConsumed = false,
+                    fuelConsumed = fuelConsumed,
                     generatorWorked = false,
-                    temperatureBefore = ResourceManager.Instance?.TemperatureLevel ?? 3,
-                    temperatureAfter = ResourceManager.Instance?.TemperatureLevel ?? 3
+                    temperatureBefore = tempBefore,
+                    temperatureAfter = tempAfter
                 };
+
+                // Добавляем статус каждого жителя из CharacterManager
+                if (characterManager != null)
+                {
+                    foreach (GeneratedCharacter c in characterManager.characters)
+                    {
+                        if (c == null || c.isDead || c.isExiled)
+                            continue;
+
+                        string foodState = c.daysWithoutFood == 0 ? "сыт" : $"без еды {c.daysWithoutFood} дн.";
+                        string waterState = c.daysWithoutWater == 0 ? "напоен" : $"без воды {c.daysWithoutWater} дн.";
+                        string healthState = c.health >= 75 ? "здоров" : (c.health >= 35 ? "ранен" : "при смерти");
+                        _pendingReport.survivalChanges.Add($"{c.fullName}: {foodState}, {waterState}, {c.health} HP, мораль {c.morale} ({healthState}).");
+
+                        if (c.daysWithoutFood == 1)
+                            _pendingReport.survivalChanges.Add($"  ↳ мораль −10 (голод 1 день)");
+                        else if (c.daysWithoutFood >= 2)
+                            _pendingReport.survivalChanges.Add($"  ↳ Истощен! −25 HP, −20 мораль.");
+
+                        if (c.daysWithoutWater == 1)
+                            _pendingReport.survivalChanges.Add($"  ↳ мораль −15 (жажда 1 день)");
+                        else if (c.daysWithoutWater >= 2)
+                            _pendingReport.survivalChanges.Add($"  ↳ Обезвоживание! −40 HP.");
+                    }
+
+                    if (resources != null)
+                    {
+                        if (fuelConsumed)
+                            _pendingReport.resourceChanges.Add("Топлива −1 канистра (обогрев работал).");
+                        else
+                            _pendingReport.resourceChanges.Add("Топлива не хватило. Обогрев отключён.");
+
+                        _pendingReport.resourceChanges.Add($"Еда на складе: {resources.FoodCans} банок.");
+                        _pendingReport.resourceChanges.Add($"Вода на складе: {resources.WaterBottles} бутылок.");
+                        _pendingReport.resourceChanges.Add($"Температура: {resources.TemperatureLevel}/3.");
+                    }
+                }
             }
 
             Debug.Log("[BedSleepTrigger] Показываем панель утренней сводки.");
