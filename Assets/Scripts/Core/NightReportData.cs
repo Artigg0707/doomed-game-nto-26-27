@@ -16,6 +16,7 @@ public class NightReportData
     public List<string> resourceChanges = new List<string>();
     public List<string> survivalChanges = new List<string>();
     public List<string> deaths = new List<string>();
+    public List<string> departures = new List<string>();
     public List<string> expeditionReturns = new List<string>();
     public List<string> secretReports = new List<string>();
 
@@ -23,6 +24,7 @@ public class NightReportData
         resourceChanges.Count > 0 ||
         survivalChanges.Count > 0 ||
         deaths.Count > 0 ||
+        departures.Count > 0 ||
         expeditionReturns.Count > 0 ||
         secretReports.Count > 0;
 
@@ -30,6 +32,8 @@ public class NightReportData
     {
         if (deaths.Count > 0)
             return $"Потери: {string.Join(", ", deaths)}.";
+        if (departures.Count > 0)
+            return $"Из бункера ушли: {string.Join(", ", departures)}.";
         if (specialEvents.Count > 0)
             return $"Событий ночью: {specialEvents.Count}.";
         return "Все живы. Инцидентов за ночь не зафиксировано.";

@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class DayCycleManager : MonoBehaviour
 {
+    private const int MoralePenaltyPerDeath = 10;
+
     public static DayCycleManager Instance { get; private set; }
 
     public int CurrentDay { get; private set; } = 1;
@@ -141,6 +143,9 @@ public class DayCycleManager : MonoBehaviour
                 }
             }
 
+            if (character.isDead)
+                continue;
+
             // Жажда
             if (character.daysWithoutWater == 1)
             {
@@ -172,6 +177,9 @@ public class DayCycleManager : MonoBehaviour
             }
         }
 
+        ApplyDeathMoralePenalty(cm, report);
+        ProcessMoraleDepartures(cm, report);
+
         // Ресурсы для отчёта
         if (report.fuelConsumed)
             report.resourceChanges.Add("Топлива −1 канистра (обогрев работал).");
@@ -186,6 +194,36 @@ public class DayCycleManager : MonoBehaviour
         report.resourceChanges.Add($"Еда на складе: {resources.FoodCans} банок.");
         report.resourceChanges.Add($"Вода на складе: {resources.WaterBottles} бутылок.");
         report.resourceChanges.Add($"Температура: {resources.TemperatureLevel}/3.");
+    }
+
+    private void ApplyDeathMoralePenalty(CharacterManager cm, NightReportData report)
+    {
+        if (report.deaths.Count == 0)
+            return;
+
+        foreach (GeneratedCharacter character in cm.characters)
+        {
+            if (character == null || character.isDead || character.isExiled)
+                continue;
+
+            character.morale -= MoralePenaltyPerDeath * report.deaths.Count;
+            report.survivalChanges.Add(
+                $"{character.fullName}: мораль −{MoralePenaltyPerDeath * report.deaths.Count} из-за смерти жителей.");
+        }
+    }
+
+    private void ProcessMoraleDepartures(CharacterManager cm, NightReportData report)
+    {
+        foreach (GeneratedCharacter character in cm.characters)
+        {
+            if (character == null || character.isDead || character.isExiled || character.morale >= 0)
+                continue;
+
+            character.isExiled = true;
+            report.departures.Add(character.fullName);
+            report.survivalChanges.Add(
+                $"{character.fullName} ушёл из бункера: мораль опустилась ниже нуля.");
+        }
     }
 
     private string GetCharacterStatus(GeneratedCharacter c)

@@ -21,6 +21,32 @@ public class CharacterManager : MonoBehaviour
     private void Start()
     {
         GenerateInitialCharacters();
+        SubscribeToNightEvents();
+    }
+
+    private void OnEnable()
+    {
+        SubscribeToNightEvents();
+    }
+
+    private void OnDisable()
+    {
+        if (DayCycleManager.Instance != null)
+            DayCycleManager.Instance.OnNightComplete -= OnNightComplete;
+    }
+
+    private void OnNightComplete(NightReportData report)
+    {
+        RemoveInactiveCharacterCards();
+    }
+
+    private void SubscribeToNightEvents()
+    {
+        if (DayCycleManager.Instance == null)
+            return;
+
+        DayCycleManager.Instance.OnNightComplete -= OnNightComplete;
+        DayCycleManager.Instance.OnNightComplete += OnNightComplete;
     }
 
     private void GenerateInitialCharacters()
@@ -184,6 +210,28 @@ public class CharacterManager : MonoBehaviour
             cardRect.anchoredPosition3D = Vector3.zero;
             Debug.LogWarning("Не удалось найти свободное место для карточки персонажа.", this);
         }
+    }
+
+    private void RemoveInactiveCharacterCards()
+    {
+        if (cardContainer == null)
+            return;
+
+        bool removedAnyCard = false;
+        CharacterCardUI[] cards = cardContainer.GetComponentsInChildren<CharacterCardUI>(true);
+
+        foreach (CharacterCardUI card in cards)
+        {
+            GeneratedCharacter character = card.Character;
+            if (character == null || (!character.isDead && !character.isExiled))
+                continue;
+
+            Destroy(card.gameObject);
+            removedAnyCard = true;
+        }
+
+        if (removedAnyCard && bioPanel != null)
+            bioPanel.ClosePanel();
     }
 
     private bool TryFindPosition(RectTransform newCard, out Vector2 position)

@@ -111,6 +111,10 @@ public class MorningReportPanel : MonoBehaviour
         foreach (var d in r.deaths)
             sb.AppendLine($"► {d} не выжил.");
 
+        // Уходы из бункера
+        foreach (var d in r.departures)
+            sb.AppendLine($"► {d} ушёл из бункера, не выдержав происходящего.");
+
         sb.AppendLine();
 
         // Итоговая строка
@@ -129,6 +133,7 @@ public class MorningReportPanel : MonoBehaviour
         var thirsty = new List<string>();
         var injured = new List<string>();
         var dead = new List<string>(r.deaths);
+        var departed = new List<string>(r.departures);
 
         foreach (var line in r.survivalChanges)
         {
@@ -154,6 +159,9 @@ public class MorningReportPanel : MonoBehaviour
             if (dead.Count > 0)
                 return FormatRandom(commentSettings.deathComments, string.Join(", ", dead), string.Join(", ", dead));
 
+            if (departed.Count > 0)
+                return $"После этой ночи {string.Join(", ", departed)} ушёл из бункера. Мораль больше не выдержала.";
+
             if (hungry.Count >= 2)
                 return FormatRandom(commentSettings.hungryComments, hungry[0], string.Join(", ", hungry));
 
@@ -177,6 +185,8 @@ public class MorningReportPanel : MonoBehaviour
 
         if (dead.Count > 0)
             return $"Вчера ушли {string.Join(", ", dead)}. Остальные выглядят так, будто сами скоро уйдут.";
+        if (departed.Count > 0)
+            return $"{string.Join(", ", departed)} ушёл из бункера. Иногда человек уходит раньше, чем умирает.";
         if (hungry.Count >= 2)
             return $"Сегодня в бункере взгляды слишком голодные. Лучше не оставлять {hungry[0]} одного с консервами.";
         if (thirsty.Count >= 2)
