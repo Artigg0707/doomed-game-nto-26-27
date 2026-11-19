@@ -2659,6 +2659,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7c94910a5891bca418be2edd7f044f19, type: 3}
       insertIndex: -1
       addedObject: {fileID: 481868391}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7c94910a5891bca418be2edd7f044f19, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 481868395}
   m_SourcePrefab: {fileID: 100100000, guid: 7c94910a5891bca418be2edd7f044f19, type: 3}
 --- !u!1 &481868386 stripped
 GameObject:
@@ -2699,6 +2702,27 @@ MonoBehaviour:
   fadePanel: {fileID: 1198264632}
   characterManager: {fileID: 161889489}
   fadeDuration: 1
+--- !u!65 &481868395
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481868386}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.016528359, y: 0.021448545, z: 0.0124501735}
+  m_Center: {x: 0.00012466611, y: 0.000599176, z: -0.0043714806}
 --- !u!1 &507837338
 GameObject:
   m_ObjectHideFlags: 0
@@ -8787,7 +8811,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Interactor
   InteractorSource: {fileID: 1640825937}
   mainCamera: {fileID: 0}
-  InteractRange: 300
+  InteractRange: 886.6
 --- !u!114 &1640825936
 MonoBehaviour:
   m_ObjectHideFlags: 0
