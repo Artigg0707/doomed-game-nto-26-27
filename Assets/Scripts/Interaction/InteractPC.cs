@@ -12,7 +12,7 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
     [Header("Panel to open")]
     [SerializeField] private GameObject panelToOpen;
 
-    public float highlightValue = 1.1f;
+    public float highlightValue = 0.01f;
     public float normalValue = 0f;
     public string propertyName = "_OutlineSize";
 
@@ -32,7 +32,7 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
                 _outlineMaterial = mats[0];
         }
 
-        // Камера необязательна: для обычной панели её можно не назначать.
+        // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
         if (objCam != null)
             objCam.Priority = 0;
 
@@ -44,7 +44,7 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
         if (Input.GetKeyDown(KeyCode.N))
             outCam();
 
-        // Снимаем блокировку подсветки после закрытия панели.
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
         if (_isInteracting &&
             panelToOpen != null &&
             !panelToOpen.activeInHierarchy)
@@ -113,5 +113,13 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
     {
         if (_outlineMaterial != null)
             _outlineMaterial.SetFloat(propertyName, value);
+        if(value == 0)
+        {
+            _outlineMaterial.SetColor("_OutLine_Color",Color.black);
+        }
+        else
+        {
+            _outlineMaterial.SetColor("_OutLine_Color",Color.white);
+        }
     }
 }

@@ -1051,6 +1051,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &90865116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 90865114}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f70b8f025e36d884985f2197c81a67f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PCMenu
 --- !u!114 &90865117
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3801,7 +3813,7 @@ MonoBehaviour:
   playerCamera: {fileID: 1640825934}
   objCam: {fileID: 2135382017}
   panelToOpen: {fileID: 1566248165}
-  highlightValue: 1.1
+  highlightValue: 0.01
   normalValue: 0
   propertyName: _OutlineSize
 --- !u!114 &481868391
@@ -7858,7 +7870,7 @@ MonoBehaviour:
   playerCamera: {fileID: 1640825934}
   objCam: {fileID: 742780327}
   panelToOpen: {fileID: 1167158250}
-  highlightValue: 1.1
+  highlightValue: 0.01
   normalValue: 0
   propertyName: _OutlineSize
 --- !u!64 &1100460244
@@ -9009,7 +9021,7 @@ MonoBehaviour:
   playerCamera: {fileID: 1640825934}
   objCam: {fileID: 725664331}
   panelToOpen: {fileID: 90865114}
-  highlightValue: 1.1
+  highlightValue: 0.01
   normalValue: 0
   propertyName: _OutlineSize
 --- !u!65 &1370281088
@@ -9531,7 +9543,7 @@ MonoBehaviour:
   playerCamera: {fileID: 1640825934}
   objCam: {fileID: 45982576}
   panelToOpen: {fileID: 0}
-  highlightValue: 1.1
+  highlightValue: 0.01
   normalValue: 0
   propertyName: _OutlineSize
 --- !u!65 &1477173479
