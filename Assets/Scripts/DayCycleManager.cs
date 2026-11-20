@@ -13,7 +13,6 @@ public class DayCycleManager : MonoBehaviour
     public event Action<NightReportData> OnNightComplete;
 
     [SerializeField] private CharacterManager characterManager;
-    [SerializeField] private ExpeditionManager expeditionManager;
 
     private void Awake()
     {
@@ -83,11 +82,6 @@ public class DayCycleManager : MonoBehaviour
         resources.resourceData.currentDay = CurrentDay;
         report.newDay = CurrentDay;
 
-        if (expeditionManager == null)
-            expeditionManager = ExpeditionManager.Instance;
-        if (expeditionManager != null)
-            expeditionManager.ResolveReturns(CurrentDay, report);
-
         OnDayChanged?.Invoke(CurrentDay);
         OnNightComplete?.Invoke(report);
 
@@ -103,8 +97,8 @@ public class DayCycleManager : MonoBehaviour
         {
             if (character == null || character.isDead || character.isExiled)
                 continue;
-            if (character.status == CharacterStatus.OnExpedition)
-                continue;
+
+            // ---------- Еда ----------
             if (character.receivesFoodToday)
             {
                 character.daysWithoutFood = 0;

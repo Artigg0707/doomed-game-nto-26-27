@@ -28,14 +28,9 @@ public class GeneratedCharacter
     [SerializeField] public bool receivesWaterToday = false;
 
     [Header("Состояние")]
-    [SerializeField] public CharacterStatus status = CharacterStatus.Free;
     [SerializeField] public bool isDead = false;
     [SerializeField] public bool isExiled = false;
     [SerializeField] public bool isSecretRevealed = false;
-
-    [Header("Экспедиция")]
-    [SerializeField] public string expeditionLocationId = "";
-    [SerializeField] public int expeditionReturnDay = -1;
 
     [SerializeField] public List<Trait> traits = new List<Trait>();
     [SerializeField] public string description;

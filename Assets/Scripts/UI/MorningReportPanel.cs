@@ -115,16 +115,9 @@ public class MorningReportPanel : MonoBehaviour
         foreach (var d in r.departures)
             sb.AppendLine($"► {d} ушёл из бункера, не выдержав происходящего.");
 
-        // Возвращение экспедиций
-        if (r.expeditionReturns.Count > 0)
-        {
-            sb.AppendLine();
-            sb.AppendLine("Возвращение экспедиции:");
-            foreach (var m in r.expeditionReturns)
-                sb.AppendLine("► " + m);
-        }
-
         sb.AppendLine();
+
+        // Итоговая строка
         sb.AppendLine(r.GetSummaryLine());
 
         sb.AppendLine();
