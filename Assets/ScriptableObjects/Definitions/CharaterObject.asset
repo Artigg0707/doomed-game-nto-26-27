@@ -22,6 +22,9 @@ MonoBehaviour:
   maxAge: 60
   maleObliks:
   - {fileID: 1787433143995992622, guid: 013423d8671429042ba54bd3ce72a683, type: 3}
+  - {fileID: -8068611877059924984, guid: 7c920f9e031937048a9534b71eea28f5, type: 3}
+  - {fileID: -8823498167773522752, guid: 7577f57ac4690a7439ddab5781e2298e, type: 3}
   femaleObliks:
   - {fileID: -6362907454686395223, guid: ea72b6cf03c45004b84537f401dc70a6, type: 3}
+  - {fileID: 4219224880316842964, guid: a148ed23481a63747a67d53091310e80, type: 3}
   namePool: {fileID: 11400000, guid: 628cbe606cea02b4a8954444beb2d1e6, type: 2}

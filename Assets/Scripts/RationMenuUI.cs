@@ -140,6 +140,8 @@ public class RationMenuUI : MonoBehaviour, IOpenablePanel
         {
             if (character == null || character.isDead || character.isExiled)
                 continue;
+            if (character.status == CharacterStatus.OnExpedition)
+                continue;
 
             RationCharacterCardUI card =
                 Instantiate(cardPrefab, cardsContainer, false);
