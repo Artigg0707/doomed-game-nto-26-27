@@ -649,8 +649,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f70b8f025e36d884985f2197c81a67f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PCMenu
-  tabComponents:
-  - {fileID: 0}
 --- !u!114 &90865117
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1496,13 +1494,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fc635a17585fd6458b3c58edb83be79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExpeditionManager
-  locations:
-  - {fileID: 11400000, guid: 9cc3c2fb70498184faf10e45534ecfca, type: 2}
-  - {fileID: 11400000, guid: ec7f164e2568ada438c3a26bfcc5069e, type: 2}
-  - {fileID: 11400000, guid: 0a4be6fad1363d942b281cb1c94c93da, type: 2}
-  active: []
-  characterManager: {fileID: 161889489}
-  resourceManager: {fileID: 161889488}
 --- !u!1 &201439612
 GameObject:
   m_ObjectHideFlags: 0
@@ -2807,7 +2798,7 @@ MonoBehaviour:
   playerCamera: {fileID: 1640825934}
   objCam: {fileID: 2135382017}
   panelToOpen: {fileID: 1566248165}
-  highlightValue: 1.1
+  highlightValue: 0.01
   normalValue: 0
   propertyName: _OutlineSize
 --- !u!114 &481868391
@@ -5478,7 +5469,7 @@ MonoBehaviour:
   playerCamera: {fileID: 1640825934}
   objCam: {fileID: 742780327}
   panelToOpen: {fileID: 1167158250}
-  highlightValue: 1.1
+  highlightValue: 0.01
   normalValue: 0
   propertyName: _OutlineSize
 --- !u!64 &1100460244
@@ -6437,7 +6428,7 @@ MonoBehaviour:
   playerCamera: {fileID: 1640825934}
   objCam: {fileID: 725664331}
   panelToOpen: {fileID: 90865114}
-  highlightValue: 1.1
+  highlightValue: 0.01
   normalValue: 0
   propertyName: _OutlineSize
 --- !u!65 &1370281088
@@ -6745,7 +6736,7 @@ MonoBehaviour:
   playerCamera: {fileID: 1640825934}
   objCam: {fileID: 45982576}
   panelToOpen: {fileID: 0}
-  highlightValue: 1.1
+  highlightValue: 0.01
   normalValue: 0
   propertyName: _OutlineSize
 --- !u!65 &1477173479
