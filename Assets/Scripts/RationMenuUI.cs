@@ -5,6 +5,7 @@ public class RationMenuUI : MonoBehaviour, IOpenablePanel
 {
     [Header("Data")]
     [SerializeField] private CharacterManager characterManager;
+    [SerializeField] private ExpeditionManager expeditionManager;
     [SerializeField] private RationCharacterCardUI cardPrefab;
 
     [Header("UI")]
@@ -23,13 +24,7 @@ public class RationMenuUI : MonoBehaviour, IOpenablePanel
 
     private void OnDisable()
     {
-        if (characterManager != null)
-            characterManager.OnRationsChanged -= RefreshResourceCounts;
-
-        if (subscribedResourceManager != null)
-            subscribedResourceManager.OnResourcesChanged -= RefreshResourceCounts;
-
-        subscribedResourceManager = null;
+        UnsubscribeFromEvents();
     }
 
     public void Open()
@@ -80,6 +75,35 @@ public class RationMenuUI : MonoBehaviour, IOpenablePanel
             subscribedResourceManager.OnResourcesChanged -= RefreshResourceCounts;
             subscribedResourceManager.OnResourcesChanged += RefreshResourceCounts;
         }
+
+        if (expeditionManager != null)
+        {
+            expeditionManager.OnExpeditionsChanged -= HandleExpeditionsChanged;
+            expeditionManager.OnExpeditionsChanged += HandleExpeditionsChanged;
+        }
+    }
+
+    private void UnsubscribeFromEvents()
+    {
+        if (characterManager != null)
+            characterManager.OnRationsChanged -= RefreshResourceCounts;
+
+        if (subscribedResourceManager != null)
+            subscribedResourceManager.OnResourcesChanged -= RefreshResourceCounts;
+
+        if (expeditionManager != null)
+            expeditionManager.OnExpeditionsChanged -= HandleExpeditionsChanged;
+
+        subscribedResourceManager = null;
+    }
+
+    private void HandleExpeditionsChanged()
+    {
+        if (!gameObject.activeInHierarchy)
+            return;
+
+        RebuildCards();
+        RefreshResourceCounts();
     }
 
     private void RefreshResourceCounts()
@@ -124,7 +148,7 @@ public class RationMenuUI : MonoBehaviour, IOpenablePanel
             return;
         }
 
-        // ”дал€ем ранее созданные карточки, но оставл€ем другие объекты Content.
+        // ”дал€ем только карточки пайков, оставл€€ прочие объекты Content.
         for (int i = cardsContainer.childCount - 1; i >= 0; i--)
         {
             Transform child = cardsContainer.GetChild(i);
@@ -140,6 +164,12 @@ public class RationMenuUI : MonoBehaviour, IOpenablePanel
         {
             if (character == null || character.isDead || character.isExiled)
                 continue;
+
+            if (expeditionManager != null &&
+                expeditionManager.IsCharacterOnExpedition(character))
+            {
+                continue;
+            }
 
             RationCharacterCardUI card =
                 Instantiate(cardPrefab, cardsContainer, false);

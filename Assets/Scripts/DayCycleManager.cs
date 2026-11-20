@@ -7,7 +7,7 @@ public class DayCycleManager : MonoBehaviour
     private const int MoralePenaltyPerDeath = 10;
 
     public static DayCycleManager Instance { get; private set; }
-
+    [SerializeField] private ExpeditionManager expeditionManager;
     public int CurrentDay { get; private set; } = 1;
     public event Action<int> OnDayChanged;
     public event Action<NightReportData> OnNightComplete;
@@ -16,6 +16,8 @@ public class DayCycleManager : MonoBehaviour
 
     private void Awake()
     {
+        if (expeditionManager == null)
+            expeditionManager = GetComponent<ExpeditionManager>();
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -23,7 +25,8 @@ public class DayCycleManager : MonoBehaviour
         }
 
         Instance = this;
-
+        if (expeditionManager == null)
+            expeditionManager = GetComponent<ExpeditionManager>();
         ResourceManager resources = ResourceManager.Instance;
         if (resources != null && resources.resourceData != null)
         {
@@ -76,7 +79,8 @@ public class DayCycleManager : MonoBehaviour
         {
             Debug.LogError("CharacterManager is not assigned in DayCycleManager.", this);
         }
-
+        if (expeditionManager != null)
+            expeditionManager.ProcessCompletedDay(report);
         // 4. Переход к следующему дню
         CurrentDay++;
         resources.resourceData.currentDay = CurrentDay;
@@ -97,7 +101,11 @@ public class DayCycleManager : MonoBehaviour
         {
             if (character == null || character.isDead || character.isExiled)
                 continue;
-
+            if (expeditionManager != null &&
+                expeditionManager.IsCharacterOnExpedition(character))
+            {
+                continue;
+            }
             // ---------- Еда ----------
             if (character.receivesFoodToday)
             {
