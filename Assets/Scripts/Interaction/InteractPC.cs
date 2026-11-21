@@ -21,7 +21,7 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
     void Start()
     {
         Renderer renderer = GetComponent<Renderer>();
-
+        panelToOpen.SetActive(false);
         if (renderer != null)
         {
             Material[] mats = renderer.materials;
@@ -106,6 +106,8 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
         if (objCam != null)
             objCam.Priority = 0;
 
+
+        panelToOpen.SetActive(false);
         _isInteracting = false;
         ApplyHighlightValue(normalValue);
     }
