@@ -6,28 +6,81 @@ using UnityEngine;
 public class ExpeditionManager : MonoBehaviour
 {
     [Serializable]
-    private class ExpeditionRun
+    public class ExpeditionRun
     {
         public ExpeditionLocationData location;
         public GeneratedCharacter character;
         public int daysRemaining;
     }
 
+    [Serializable]
+    private class LocationCooldown
+    {
+        public ExpeditionLocationData location;
+        public int availableOnDay;
+    }
+
+    [Header("References")]
     [SerializeField] private CharacterManager characterManager;
+
+    [Header("Limits")]
+    [SerializeField, Min(1)] private int maxActiveExpeditions = 2;
+
+    [Header("Runtime state")]
     [SerializeField] private List<ExpeditionRun> activeExpeditions =
         new List<ExpeditionRun>();
 
+    [SerializeField] private List<LocationCooldown> locationCooldowns =
+        new List<LocationCooldown>();
+
     public event Action OnExpeditionsChanged;
+
+    public int ActiveExpeditionCount =>
+        activeExpeditions != null ? activeExpeditions.Count : 0;
+
+    public int MaxConcurrentExpeditions =>
+        Mathf.Max(1, maxActiveExpeditions);
+
+    private int lastProcessedDay = -1;
+
+    private int CurrentDay
+    {
+        get
+        {
+            if (DayCycleManager.Instance != null)
+                return Mathf.Max(1, DayCycleManager.Instance.CurrentDay);
+
+            return 1;
+        }
+    }
 
     private void Awake()
     {
         if (characterManager == null)
             characterManager = GetComponent<CharacterManager>();
+
+        if (activeExpeditions == null)
+            activeExpeditions = new List<ExpeditionRun>();
+
+        if (locationCooldowns == null)
+            locationCooldowns = new List<LocationCooldown>();
+    }
+
+    public ExpeditionRun GetActiveExpeditionAt(int index)
+    {
+        if (activeExpeditions == null ||
+            index < 0 ||
+            index >= activeExpeditions.Count)
+        {
+            return null;
+        }
+
+        return activeExpeditions[index];
     }
 
     public bool IsCharacterOnExpedition(GeneratedCharacter character)
     {
-        if (character == null)
+        if (character == null || activeExpeditions == null)
             return false;
 
         foreach (ExpeditionRun expedition in activeExpeditions)
@@ -37,6 +90,59 @@ public class ExpeditionManager : MonoBehaviour
         }
 
         return false;
+    }
+
+    public bool IsLocationOnExpedition(ExpeditionLocationData location)
+    {
+        if (location == null || activeExpeditions == null)
+            return false;
+
+        foreach (ExpeditionRun expedition in activeExpeditions)
+        {
+            if (expedition != null && expedition.location == location)
+                return true;
+        }
+
+        return false;
+    }
+
+    public int GetLocationCooldownDaysRemaining(
+        ExpeditionLocationData location)
+    {
+        LocationCooldown cooldown = FindCooldown(location);
+
+        if (cooldown == null)
+            return 0;
+
+        return Mathf.Max(0, cooldown.availableOnDay - CurrentDay);
+    }
+
+    public bool IsLocationAvailable(ExpeditionLocationData location)
+    {
+        if (location == null)
+            return false;
+
+        if (IsLocationOnExpedition(location))
+            return false;
+
+        return GetLocationCooldownDaysRemaining(location) <= 0;
+    }
+
+    public string GetLocationUnavailableReason(
+        ExpeditionLocationData location)
+    {
+        if (location == null)
+            return "Локация недоступна";
+
+        if (IsLocationOnExpedition(location))
+            return "Идёт вылазка";
+
+        int daysRemaining = GetLocationCooldownDaysRemaining(location);
+
+        if (daysRemaining > 0)
+            return $"Доступна через {FormatDays(daysRemaining)}";
+
+        return "";
     }
 
     public bool TryStartExpedition(
@@ -62,6 +168,20 @@ public class ExpeditionManager : MonoBehaviour
             return false;
         }
 
+        if (ActiveExpeditionCount >= MaxConcurrentExpeditions)
+        {
+            message =
+                $"Уже отправлено максимальное количество вылазок: " +
+                $"{ActiveExpeditionCount}/{MaxConcurrentExpeditions}.";
+            return false;
+        }
+
+        if (!IsLocationAvailable(location))
+        {
+            message = GetLocationUnavailableReason(location);
+            return false;
+        }
+
         if (!characterManager.characters.Contains(character))
         {
             message = "Персонаж отсутствует в списке CharacterManager.";
@@ -80,13 +200,21 @@ public class ExpeditionManager : MonoBehaviour
             return false;
         }
 
-        // Если пайки уже назначили, отменяем их через существующую логику.
-        // Списанные ресурсы вернутся; ночью персонаж не останется с назначенным пайком.
+        // Назначенные пайки отменяются через существующий CharacterManager.
+        // Ресурсы возвращаются, а счётчики голода и жажды здесь не меняются.
         if (character.receivesFoodToday)
             characterManager.SetFoodRation(character, false);
 
         if (character.receivesWaterToday)
             characterManager.SetWaterRation(character, false);
+
+        int minCooldown = Mathf.Max(1, location.minCooldownDays);
+        int maxCooldown = Mathf.Max(minCooldown, location.maxCooldownDays);
+        int cooldownDays = UnityEngine.Random.Range(
+            minCooldown,
+            maxCooldown + 1);
+
+        SetLocationCooldown(location, CurrentDay + cooldownDays);
 
         activeExpeditions.Add(new ExpeditionRun
         {
@@ -96,21 +224,28 @@ public class ExpeditionManager : MonoBehaviour
         });
 
         message =
-            $"{character.fullName} отправлен(а) в локацию «{location.locationName}».";
+            $"{character.fullName} отправлен(а) в локацию " +
+            $"«{location.locationName}». Локация снова станет доступна " +
+            $"через {FormatDays(cooldownDays)}.";
 
         OnExpeditionsChanged?.Invoke();
         return true;
     }
 
-    // Вызывается один раз за завершённый игровой день.
+    // Вызывать один раз после продвижения игрового дня.
     public void ProcessCompletedDay(NightReportData report)
     {
-        if (activeExpeditions == null || activeExpeditions.Count == 0)
+        int processingDay = CurrentDay;
+
+        // Не даём случайно обработать один и тот же день дважды.
+        if (lastProcessedDay == processingDay)
             return;
 
-        bool changed = false;
+        lastProcessedDay = processingDay;
 
-        // Идём с конца, потому что завершённые вылазки удаляются из списка.
+        if (activeExpeditions == null)
+            activeExpeditions = new List<ExpeditionRun>();
+
         for (int i = activeExpeditions.Count - 1; i >= 0; i--)
         {
             ExpeditionRun expedition = activeExpeditions[i];
@@ -118,29 +253,16 @@ public class ExpeditionManager : MonoBehaviour
             if (expedition == null)
             {
                 activeExpeditions.RemoveAt(i);
-                changed = true;
                 continue;
             }
 
-            expedition.daysRemaining--;
-            changed = true;
+            expedition.daysRemaining =
+                Mathf.Max(0, expedition.daysRemaining - 1);
 
             if (expedition.daysRemaining > 0)
                 continue;
 
-            string rewards = GiveRewards(expedition.location);
-
-            string characterName = expedition.character != null
-                ? expedition.character.fullName
-                : "Персонаж";
-
-            string locationName = expedition.location != null
-                ? expedition.location.locationName
-                : "неизвестную локацию";
-
-            string returnMessage =
-                $"{characterName} вернулся(лась) из локации «{locationName}». " +
-                $"Награды: {rewards}.";
+            string returnMessage = CompleteExpedition(expedition, report);
 
             if (report != null && report.expeditionReturns != null)
                 report.expeditionReturns.Add(returnMessage);
@@ -149,8 +271,97 @@ public class ExpeditionManager : MonoBehaviour
             activeExpeditions.RemoveAt(i);
         }
 
-        if (changed)
-            OnExpeditionsChanged?.Invoke();
+        RemoveExpiredCooldowns(processingDay);
+
+        // Это событие также обновляет UI, когда локация снова становится доступна.
+        OnExpeditionsChanged?.Invoke();
+    }
+
+    private string CompleteExpedition(
+        ExpeditionRun expedition,
+        NightReportData report)
+    {
+        if (expedition.character == null)
+            return "Вылазка завершилась без персонажа. Награды не получены.";
+
+        GeneratedCharacter character = expedition.character;
+        ExpeditionLocationData location = expedition.location;
+
+        if (character.isDead)
+            return $"{character.fullName} погиб(ла) во время вылазки. Награды не получены.";
+
+        if (location == null)
+            return $"{character.fullName} вернулся(лась), но локация не найдена.";
+
+        // Сначала проверяется риск смерти.
+        if (RollChance(location.deathChancePercent))
+        {
+            MarkCharacterDead(character, report);
+
+            return
+                $"{character.fullName} погиб(ла) во время вылазки " +
+                $"в «{location.locationName}». Награды не получены.";
+        }
+
+        // Если персонаж пережил проверку смерти, отдельно проверяем ранение.
+        string injuryMessage = "";
+
+        if (RollChance(location.injuryChancePercent))
+        {
+            int minDamage = Mathf.Max(0, location.minInjuryDamage);
+            int maxDamage = Mathf.Max(minDamage, location.maxInjuryDamage);
+            int damage = UnityEngine.Random.Range(minDamage, maxDamage + 1);
+
+            character.health = Mathf.Max(0, character.health - damage);
+
+            if (character.health <= 0)
+            {
+                MarkCharacterDead(character, report);
+
+                return
+                    $"{character.fullName} получил(а) смертельное ранение " +
+                    $"во время вылазки в «{location.locationName}». " +
+                    $"Награды не получены.";
+            }
+
+            injuryMessage =
+                $" Получил(а) урон {damage} HP; осталось {character.health} HP.";
+        }
+
+        string rewards = GiveRewards(location);
+
+        return
+            $"{character.fullName} вернулся(лась) из локации " +
+            $"«{location.locationName}».{injuryMessage} Награды: {rewards}.";
+    }
+
+    private bool RollChance(int chancePercent)
+    {
+        int clampedChance = Mathf.Clamp(chancePercent, 0, 100);
+        return UnityEngine.Random.Range(0, 100) < clampedChance;
+    }
+
+    private void MarkCharacterDead(
+        GeneratedCharacter character,
+        NightReportData report)
+    {
+        character.health = 0;
+        character.isDead = true;
+
+        if (report == null)
+            return;
+
+        if (report.deaths != null &&
+            !report.deaths.Contains(character.fullName))
+        {
+            report.deaths.Add(character.fullName);
+        }
+
+        if (report.survivalChanges != null)
+        {
+            report.survivalChanges.Add(
+                $"{character.fullName} погиб(ла) во время экспедиции.");
+        }
     }
 
     private string GiveRewards(ExpeditionLocationData location)
@@ -180,8 +391,8 @@ public class ExpeditionManager : MonoBehaviour
             int minAmount = Mathf.Max(0, reward.minAmount);
             int maxAmount = Mathf.Max(minAmount, reward.maxAmount);
 
-            // Верхняя граница Random.Range для int не включается,
-            // поэтому прибавляем 1, чтобы maxAmount тоже мог выпасть.
+            // Для int верхняя граница Random.Range не включается,
+            // поэтому добавляем 1.
             int amount = UnityEngine.Random.Range(minAmount, maxAmount + 1);
 
             if (amount <= 0)
@@ -213,6 +424,58 @@ public class ExpeditionManager : MonoBehaviour
         return result.Length > 0 ? result.ToString() : "нет наград";
     }
 
+    private void SetLocationCooldown(
+        ExpeditionLocationData location,
+        int availableOnDay)
+    {
+        LocationCooldown cooldown = FindCooldown(location);
+
+        if (cooldown == null)
+        {
+            cooldown = new LocationCooldown
+            {
+                location = location
+            };
+
+            locationCooldowns.Add(cooldown);
+        }
+
+        cooldown.availableOnDay = availableOnDay;
+    }
+
+    private LocationCooldown FindCooldown(
+        ExpeditionLocationData location)
+    {
+        if (location == null || locationCooldowns == null)
+            return null;
+
+        foreach (LocationCooldown cooldown in locationCooldowns)
+        {
+            if (cooldown != null && cooldown.location == location)
+                return cooldown;
+        }
+
+        return null;
+    }
+
+    private void RemoveExpiredCooldowns(int currentDay)
+    {
+        if (locationCooldowns == null)
+            return;
+
+        for (int i = locationCooldowns.Count - 1; i >= 0; i--)
+        {
+            LocationCooldown cooldown = locationCooldowns[i];
+
+            if (cooldown == null ||
+                cooldown.location == null ||
+                cooldown.availableOnDay <= currentDay)
+            {
+                locationCooldowns.RemoveAt(i);
+            }
+        }
+    }
+
     private string GetRewardName(ExpeditionRewardType rewardType)
     {
         switch (rewardType)
@@ -229,5 +492,22 @@ public class ExpeditionManager : MonoBehaviour
             default:
                 return "ресурс";
         }
+    }
+
+    private string FormatDays(int days)
+    {
+        int lastTwoDigits = days % 100;
+        int lastDigit = days % 10;
+
+        if (lastTwoDigits >= 11 && lastTwoDigits <= 14)
+            return $"{days} дней";
+
+        if (lastDigit == 1)
+            return $"{days} день";
+
+        if (lastDigit >= 2 && lastDigit <= 4)
+            return $"{days} дня";
+
+        return $"{days} дней";
     }
 }

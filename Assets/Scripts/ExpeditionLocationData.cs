@@ -24,10 +24,7 @@ public class ExpeditionRewardData
 public class ExpeditionLocationData : ScriptableObject
 {
     [Header("Basic Information")]
-
-    [Tooltip("Уникальный постоянный ID, например abandoned_shop")]
     public string locationId;
-
     public string locationName;
     public Sprite locationImage;
 
@@ -39,6 +36,27 @@ public class ExpeditionLocationData : ScriptableObject
 
     [Min(1)]
     public int durationDays = 1;
+
+    [Header("Risk")]
+    [Range(0, 100)]
+    public int injuryChancePercent = 25;
+
+    [Range(0, 100)]
+    public int deathChancePercent = 5;
+
+    [Min(0)]
+    public int minInjuryDamage = 10;
+
+    [Min(0)]
+    public int maxInjuryDamage = 25;
+
+    [Header("Location Cooldown")]
+    [Tooltip("Случайное количество игровых дней до повторной доступности локации.")]
+    [Min(1)]
+    public int minCooldownDays = 2;
+
+    [Min(1)]
+    public int maxCooldownDays = 4;
 
     [Header("Possible Rewards")]
     public List<ExpeditionRewardData> possibleRewards =

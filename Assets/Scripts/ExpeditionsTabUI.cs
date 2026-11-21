@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class ExpeditionsTabUI : MonoBehaviour
 {
+    private const int MaxActiveExpeditions = 2;
+
     [Header("Location data")]
     [SerializeField] private ExpeditionLocationCatalog locationCatalog;
     [SerializeField] private ExpeditionLocationButtonUI locationButtonPrefab;
@@ -42,75 +44,142 @@ public class ExpeditionsTabUI : MonoBehaviour
     {
         if (sendExpeditionButton != null)
         {
-            sendExpeditionButton.onClick.RemoveListener(OnSendExpeditionClicked);
-            sendExpeditionButton.onClick.AddListener(OnSendExpeditionClicked);
+            sendExpeditionButton.onClick.RemoveListener(
+                OnSendExpeditionClicked);
+
+            sendExpeditionButton.onClick.AddListener(
+                OnSendExpeditionClicked);
         }
 
         if (expeditionManager != null)
         {
-            expeditionManager.OnExpeditionsChanged -= HandleExpeditionsChanged;
-            expeditionManager.OnExpeditionsChanged += HandleExpeditionsChanged;
+            expeditionManager.OnExpeditionsChanged -=
+                HandleExpeditionsChanged;
+
+            expeditionManager.OnExpeditionsChanged +=
+                HandleExpeditionsChanged;
         }
 
-        if (!locationButtonsCreated)
-            BuildLocationButtons();
-
-        RefreshSendButton();
+        // При повторном открытии меню обновляем кнопки и список персонажей,
+        // сохраняя выбранную локацию, если она всё ещё есть в каталоге.
+        BuildLocationButtons(locationButtonsCreated);
     }
 
     private void OnDisable()
     {
         if (sendExpeditionButton != null)
-            sendExpeditionButton.onClick.RemoveListener(OnSendExpeditionClicked);
+        {
+            sendExpeditionButton.onClick.RemoveListener(
+                OnSendExpeditionClicked);
+        }
 
         if (expeditionManager != null)
-            expeditionManager.OnExpeditionsChanged -= HandleExpeditionsChanged;
+        {
+            expeditionManager.OnExpeditionsChanged -=
+                HandleExpeditionsChanged;
+        }
     }
 
     public void RefreshLocations()
     {
-        locationButtonsCreated = false;
-        BuildLocationButtons();
+        BuildLocationButtons(SelectedLocation != null);
     }
 
-    private void BuildLocationButtons()
+    private void BuildLocationButtons(bool preserveSelection)
     {
         if (locationCatalog == null)
         {
-            Debug.LogError("В ExpeditionsTabUI не назначен Location Catalog.", this);
+            Debug.LogError(
+                "В ExpeditionsTabUI не назначен Location Catalog.",
+                this);
             return;
         }
 
         if (locationButtonPrefab == null)
         {
-            Debug.LogError("В ExpeditionsTabUI не назначен Location Button Prefab.", this);
+            Debug.LogError(
+                "В ExpeditionsTabUI не назначен Location Button Prefab.",
+                this);
             return;
         }
 
         if (locationButtonsContent == null)
         {
-            Debug.LogError("В ExpeditionsTabUI не назначен Location Buttons Content.", this);
+            Debug.LogError(
+                "В ExpeditionsTabUI не назначен Location Buttons Content.",
+                this);
             return;
         }
 
+        ExpeditionLocationData previousLocation =
+            preserveSelection ? SelectedLocation : null;
+
+        GeneratedCharacter previousCharacter =
+            preserveSelection ? SelectedCharacter : null;
+
         ClearChildren(locationButtonsContent);
-        ShowEmptyState();
 
         if (locationCatalog.locations != null)
         {
-            foreach (ExpeditionLocationData location in locationCatalog.locations)
+            foreach (ExpeditionLocationData location
+                     in locationCatalog.locations)
             {
                 if (location == null)
                     continue;
 
                 ExpeditionLocationButtonUI button =
-                    Instantiate(locationButtonPrefab, locationButtonsContent, false);
+                    Instantiate(
+                        locationButtonPrefab,
+                        locationButtonsContent,
+                        false);
 
-                button.Setup(location, SelectLocation);
+                button.Setup(
+                    location,
+                    SelectLocation,
+                    expeditionManager);
             }
         }
 
         locationButtonsCreated = true;
+
+        if (previousLocation != null &&
+            CatalogContains(previousLocation))
+        {
+            SelectedLocation = previousLocation;
+
+            SelectedCharacter =
+                IsCharacterAvailable(previousCharacter)
+                    ? previousCharacter
+                    : null;
+
+            ShowLocationDetails(SelectedLocation);
+            BuildCharacterCards();
+        }
+        else
+        {
+            ShowEmptyState();
+        }
+
+        RefreshSendButton();
+    }
+
+    private bool CatalogContains(ExpeditionLocationData location)
+    {
+        if (locationCatalog == null ||
+            locationCatalog.locations == null ||
+            location == null)
+        {
+            return false;
+        }
+
+        foreach (ExpeditionLocationData catalogLocation
+                 in locationCatalog.locations)
+        {
+            if (catalogLocation == location)
+                return true;
+        }
+
+        return false;
     }
 
     private void SelectLocation(ExpeditionLocationData location)
@@ -120,6 +189,16 @@ public class ExpeditionsTabUI : MonoBehaviour
 
         SelectedLocation = location;
         SelectedCharacter = null;
+
+        ShowLocationDetails(location);
+        BuildCharacterCards();
+        RefreshSendButton();
+    }
+
+    private void ShowLocationDetails(ExpeditionLocationData location)
+    {
+        if (location == null)
+            return;
 
         if (emptyStateText != null)
             emptyStateText.gameObject.SetActive(false);
@@ -135,7 +214,8 @@ public class ExpeditionsTabUI : MonoBehaviour
 
         if (riskText != null)
         {
-            string risk = string.IsNullOrWhiteSpace(location.riskDescription)
+            string risk = string.IsNullOrWhiteSpace(
+                    location.riskDescription)
                 ? "не указан"
                 : location.riskDescription;
 
@@ -146,7 +226,10 @@ public class ExpeditionsTabUI : MonoBehaviour
             rewardsText.text = BuildRewardsText(location);
 
         if (durationText != null)
-            durationText.text = $"Длительность: {FormatDays(location.durationDays)}";
+        {
+            durationText.text =
+                $"Длительность: {FormatDays(location.durationDays)}";
+        }
 
         if (locationImage != null)
         {
@@ -154,29 +237,33 @@ public class ExpeditionsTabUI : MonoBehaviour
             locationImage.enabled = location.locationImage != null;
             locationImage.raycastTarget = false;
         }
-
-        BuildCharacterCards();
-        RefreshSendButton();
     }
 
     private void BuildCharacterCards()
     {
+        ClearCharacterCards();
+
+        if (SelectedLocation == null)
+            return;
+
         if (characterCardsContent == null)
         {
-            Debug.LogError("В ExpeditionsTabUI не назначен Character Cards Content.", this);
+            Debug.LogError(
+                "В ExpeditionsTabUI не назначен Character Cards Content.",
+                this);
             return;
         }
 
         if (characterCardPrefab == null)
         {
-            Debug.LogError("В ExpeditionsTabUI не назначен Character Card Prefab.", this);
+            Debug.LogError(
+                "В ExpeditionsTabUI не назначен Character Card Prefab.",
+                this);
             return;
         }
 
-        ClearChildren(characterCardsContent);
-        characterCards.Clear();
-
-        if (characterManager == null || characterManager.characters == null)
+        if (characterManager == null ||
+            characterManager.characters == null)
         {
             Debug.LogError(
                 "В ExpeditionsTabUI не назначен CharacterManager " +
@@ -185,73 +272,88 @@ public class ExpeditionsTabUI : MonoBehaviour
             return;
         }
 
-        foreach (GeneratedCharacter character in characterManager.characters)
+        foreach (GeneratedCharacter character
+                 in characterManager.characters)
         {
-            if (character == null || character.isDead || character.isExiled)
+            if (!IsCharacterAvailable(character))
                 continue;
-
-            if (expeditionManager != null &&
-                expeditionManager.IsCharacterOnExpedition(character))
-            {
-                continue;
-            }
 
             ExpeditionCharacterCardUI card =
-                Instantiate(characterCardPrefab, characterCardsContent, false);
+                Instantiate(
+                    characterCardPrefab,
+                    characterCardsContent,
+                    false);
 
             card.Setup(character, SelectCharacter);
             card.SetSelected(character == SelectedCharacter);
+
             characterCards.Add(card);
         }
     }
 
     private void SelectCharacter(GeneratedCharacter character)
     {
-        if (character == null || character.isDead || character.isExiled)
+        if (!IsCharacterAvailable(character))
             return;
-
-        if (expeditionManager != null &&
-            expeditionManager.IsCharacterOnExpedition(character))
-        {
-            return;
-        }
 
         SelectedCharacter = character;
 
         foreach (ExpeditionCharacterCardUI card in characterCards)
         {
             if (card != null)
-                card.SetSelected(card.Character == SelectedCharacter);
+            {
+                card.SetSelected(
+                    card.Character == SelectedCharacter);
+            }
         }
 
         RefreshSendButton();
+    }
+
+    private bool IsCharacterAvailable(GeneratedCharacter character)
+    {
+        if (character == null ||
+            character.isDead ||
+            character.isExiled)
+        {
+            return false;
+        }
+
+        return expeditionManager == null ||
+               !expeditionManager.IsCharacterOnExpedition(character);
     }
 
     private void HandleExpeditionsChanged()
     {
-        if (SelectedCharacter != null &&
-            (SelectedCharacter.isDead ||
-             SelectedCharacter.isExiled ||
-             (expeditionManager != null &&
-              expeditionManager.IsCharacterOnExpedition(SelectedCharacter))))
-        {
-            SelectedCharacter = null;
-        }
-
-        if (SelectedLocation != null && gameObject.activeInHierarchy)
-            BuildCharacterCards();
-
-        RefreshSendButton();
+        // Обновляем состояние локаций и доступных персонажей.
+        BuildLocationButtons(true);
     }
 
     private void OnSendExpeditionClicked()
     {
-        if (SelectedLocation == null || SelectedCharacter == null)
+        if (SelectedLocation == null ||
+            !IsCharacterAvailable(SelectedCharacter))
+        {
+            RefreshSendButton();
             return;
+        }
 
         if (expeditionManager == null)
         {
-            Debug.LogError("В ExpeditionsTabUI не назначен ExpeditionManager.", this);
+            Debug.LogError(
+                "В ExpeditionsTabUI не назначен ExpeditionManager.",
+                this);
+            return;
+        }
+
+        if (GetActiveExpeditionCount() >= MaxActiveExpeditions)
+        {
+            Debug.LogWarning(
+                $"Одновременно можно отправить не больше " +
+                $"{MaxActiveExpeditions} вылазок.",
+                this);
+
+            RefreshSendButton();
             return;
         }
 
@@ -261,15 +363,44 @@ public class ExpeditionsTabUI : MonoBehaviour
                 out string message))
         {
             Debug.LogWarning(message, this);
+            RefreshSendButton();
             return;
         }
 
         Debug.Log(message, this);
 
-        // ExpeditionManager вызывает OnExpeditionsChanged:
-        // этот обработчик обновит список и сбросит уже отправленного персонажа.
         SelectedCharacter = null;
+
+        // OnExpeditionsChanged также обновит кнопки.
+        // Здесь обновляем карточки на случай, если событие
+        // не было вызвано менеджером.
+        BuildCharacterCards();
         RefreshSendButton();
+    }
+
+    private int GetActiveExpeditionCount()
+    {
+        if (expeditionManager == null ||
+            characterManager == null ||
+            characterManager.characters == null)
+        {
+            return 0;
+        }
+
+        // В одной вылазке находится один персонаж.
+        int count = 0;
+
+        foreach (GeneratedCharacter character
+                 in characterManager.characters)
+        {
+            if (character != null &&
+                expeditionManager.IsCharacterOnExpedition(character))
+            {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     private void RefreshSendButton()
@@ -278,15 +409,15 @@ public class ExpeditionsTabUI : MonoBehaviour
             return;
 
         bool characterAvailable =
-            SelectedCharacter != null &&
-            !SelectedCharacter.isDead &&
-            !SelectedCharacter.isExiled &&
-            (expeditionManager == null ||
-             !expeditionManager.IsCharacterOnExpedition(SelectedCharacter));
+            IsCharacterAvailable(SelectedCharacter);
+
+        bool hasFreeExpeditionSlot =
+            GetActiveExpeditionCount() < MaxActiveExpeditions;
 
         sendExpeditionButton.interactable =
             SelectedLocation != null &&
             characterAvailable &&
+            hasFreeExpeditionSlot &&
             expeditionManager != null;
     }
 
@@ -338,7 +469,8 @@ public class ExpeditionsTabUI : MonoBehaviour
 
         StringBuilder result = new StringBuilder();
 
-        foreach (ExpeditionRewardData reward in location.possibleRewards)
+        foreach (ExpeditionRewardData reward
+                 in location.possibleRewards)
         {
             if (reward == null)
                 continue;

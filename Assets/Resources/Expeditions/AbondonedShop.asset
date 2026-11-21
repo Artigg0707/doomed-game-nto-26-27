@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -12,19 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d48b6e3cac37ffd48965fe94155ba8b6, type: 3}
   m_Name: AbondonedShop
   m_EditorClassIdentifier: Assembly-CSharp::ExpeditionLocationData
-  locationId: 1
-  locationName: "\u0417\u0430\u0431\u0440\u043E\u0448\u0435\u043D\u043D\u044B\u0439 \u043C\u0430\u0433\u0430\u0437\u0438\u043D"
+  locationId: "abandoned_shop"
+  locationName: "Заброшенный магазин"
   locationImage: {fileID: 0}
-  description: "\u0417\u0430\u0431\u0440\u043E\u0448\u0435\u043D\u043D\u044B\u0439 \u043C\u0430\u0433\u0430\u0437\u0438\u043D \u0447\u0438\u043A"
-  riskDescription: "\u043F\u0435\u0440\u0441\u044B \u043C\u043E\u0433\u0443\u0442 \u043F\u043E\u043B\u0443\u0447\u0438\u0442\u044C \u0443\u0440\u043E\u043D \u0438\u043B\u0438 \u0434\u0430\u0436\u0435 \u0443\u043C\u0435\u0440\u0435\u0442\u044C"
+  description: "Пустовавший ещё до катастрофы продуктовый магазин на окраине города. Полки в зале разграблены, но в подсобке, холодильниках и arrière-комнатах могут остаться консервы, сухие рационы и бутилированная вода."
+  riskDescription: "Потолок частично обрушен. Возможны обвалы, битое стекло и встреча с дикими псами, которые облюбовали здание."
   durationDays: 3
   possibleRewards:
   - resourceType: 0
-    minAmount: 1
-    maxAmount: 4
+    minAmount: 2
+    maxAmount: 5
   - resourceType: 1
     minAmount: 1
-    maxAmount: 2
+    maxAmount: 3
   - resourceType: 2
     minAmount: 0
-    maxAmount: 2
+    maxAmount: 1

@@ -9,14 +9,17 @@ public class ExpeditionLocationButtonUI : MonoBehaviour
     [SerializeField] private TMP_Text titleText;
 
     private ExpeditionLocationData location;
+    private ExpeditionManager expeditionManager;
     private Action<ExpeditionLocationData> onSelected;
 
     public void Setup(
         ExpeditionLocationData locationData,
-        Action<ExpeditionLocationData> selectedCallback)
+        Action<ExpeditionLocationData> selectedCallback,
+        ExpeditionManager manager)
     {
         location = locationData;
         onSelected = selectedCallback;
+        expeditionManager = manager;
 
         if (button == null)
             button = GetComponent<Button>();
@@ -26,21 +29,51 @@ public class ExpeditionLocationButtonUI : MonoBehaviour
 
         if (button == null)
         {
-            Debug.LogError("На prefab кнопки локации не найден компонент Button.", this);
+            Debug.LogError("На кнопке локации нет компонента Button.", this);
             return;
         }
 
-        if (titleText != null && location != null)
-            titleText.text = location.locationName;
-
         button.onClick.RemoveListener(OnButtonClicked);
         button.onClick.AddListener(OnButtonClicked);
+
+        RefreshAvailability();
+    }
+
+    public void RefreshAvailability()
+    {
+        if (button == null || location == null)
+            return;
+
+        bool available = expeditionManager == null ||
+                         expeditionManager.IsLocationAvailable(location);
+
+        button.interactable = available;
+
+        if (titleText == null)
+            return;
+
+        string title = location.locationName;
+
+        if (!available && expeditionManager != null)
+        {
+            string reason =
+                expeditionManager.GetLocationUnavailableReason(location);
+
+            if (!string.IsNullOrEmpty(reason))
+                title += $"\n{reason}";
+        }
+
+        titleText.text = title;
     }
 
     private void OnButtonClicked()
     {
-        if (location != null)
+        if (button != null &&
+            button.interactable &&
+            location != null)
+        {
             onSelected?.Invoke(location);
+        }
     }
 
     private void OnDestroy()

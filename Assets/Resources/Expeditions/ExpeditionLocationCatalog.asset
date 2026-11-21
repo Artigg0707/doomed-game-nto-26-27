@@ -14,3 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ExpeditionLocationCatalog
   locations:
   - {fileID: 11400000, guid: 08c43cdee542ad64aadaa94a5101d864, type: 2}
+  - {fileID: 11400000, guid: 593e91a358d90914ba1fc63c6a0e7587, type: 2}
+  - {fileID: 11400000, guid: 9cc3c2fb70498184faf10e45534ecfca, type: 2}
+  - {fileID: 11400000, guid: 0a4be6fad1363d942b281cb1c94c93da, type: 2}
+  - {fileID: 11400000, guid: ec7f164e2568ada438c3a26bfcc5069e, type: 2}
