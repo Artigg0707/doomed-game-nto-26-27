@@ -156,6 +156,24 @@ public class CharacterManager : MonoBehaviour
         OnRationsChanged?.Invoke();
     }
 
+    public bool HasLivingCharacters()
+    {
+        if (characters == null)
+            return false;
+
+        foreach (GeneratedCharacter character in characters)
+        {
+            if (character != null &&
+                !character.isDead &&
+                !character.isExiled)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void SetAllFoodRations(bool receivesFood)
     {
         foreach (GeneratedCharacter character in characters)

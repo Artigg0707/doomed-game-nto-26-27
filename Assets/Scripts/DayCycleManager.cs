@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public class DayCycleManager : MonoBehaviour
@@ -14,6 +14,7 @@ public class DayCycleManager : MonoBehaviour
 
     public event Action<int> OnDayChanged;
     public event Action<NightReportData> OnNightComplete;
+    public event Action OnDefeat;
 
     private void Awake()
     {
@@ -117,7 +118,31 @@ public class DayCycleManager : MonoBehaviour
         OnDayChanged?.Invoke(CurrentDay);
         OnNightComplete?.Invoke(report);
 
+        if (IsDefeat())
+            OnDefeat?.Invoke();
+
         Debug.Log($"Started next day: {CurrentDay}");
+    }
+
+    public bool IsDefeat()
+    {
+        if (characterManager == null)
+            return false;
+
+        if (characterManager.characters == null)
+            return true;
+
+        foreach (GeneratedCharacter character in characterManager.characters)
+        {
+            if (character != null &&
+                !character.isDead &&
+                !character.isExiled)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void UpdateSurvivalCounters(

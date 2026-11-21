@@ -6,6 +6,7 @@ public class BedSleepTrigger : MonoBehaviour
 {
     [Header("Ссылки")]
     [SerializeField] private MorningReportPanel morningReportPanel;
+    [SerializeField] private DefeatScreenPanel defeatScreenPanel;
     [SerializeField] private CanvasGroup fadePanel;
     [SerializeField] private CharacterManager characterManager;
 
@@ -85,6 +86,23 @@ public class BedSleepTrigger : MonoBehaviour
         DayCycleManager.Instance.StartNextDay();
 
         yield return new WaitForSeconds(0.3f);
+
+        if (DayCycleManager.Instance != null &&
+            DayCycleManager.Instance.IsDefeat())
+        {
+            if (defeatScreenPanel != null)
+            {
+                defeatScreenPanel.Show();
+            }
+            else
+            {
+                Debug.LogError(
+                    "DefeatScreenPanel не назначен на BedSleepTrigger.",
+                    this);
+            }
+
+            yield break;
+        }
 
         // Показываем панель утренней сводки (всегда, даже если отчёт пустой)
         if (morningReportPanel != null)

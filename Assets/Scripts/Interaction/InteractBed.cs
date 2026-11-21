@@ -6,6 +6,7 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
 {
     [Header("Ссылки")]
     [SerializeField] private MorningReportPanel morningReportPanel;
+    [SerializeField] private DefeatScreenPanel defeatScreenPanel;
     [SerializeField] private CanvasGroup fadePanel; // чёрная панель на Canvas для fade
 
     [Header("Настройки")]
@@ -79,6 +80,23 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
 
         // Небольшая пауза, чтобы отчет успел сформироваться
         yield return new WaitForSeconds(0.3f);
+
+        if (DayCycleManager.Instance != null &&
+            DayCycleManager.Instance.IsDefeat())
+        {
+            if (defeatScreenPanel != null)
+            {
+                defeatScreenPanel.Show();
+            }
+            else
+            {
+                Debug.LogError(
+                    "DefeatScreenPanel не назначен на InteractBed.",
+                    this);
+            }
+
+            yield break;
+        }
 
         // Показываем панель утренней сводки (она уже получила данные через событие)
         if (_pendingReport != null)
