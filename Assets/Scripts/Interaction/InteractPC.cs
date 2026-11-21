@@ -20,9 +20,8 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
 
     void Start()
     {
-        Renderer renderer = GetComponentInChildren<Renderer>(true);
-        if (panelToOpen != null)
-            panelToOpen.SetActive(false);
+        Renderer renderer = GetComponent<Renderer>();
+        panelToOpen.SetActive(false);
         if (renderer != null)
         {
             Material[] mats = renderer.materials;
@@ -57,19 +56,14 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
 
     public void Interact()
     {
+        
         if (objCam != null)
             objCam.Priority = 20;
 
         _isInteracting = true;
         ApplyHighlightValue(normalValue);
 
-        if (panelToOpen == null)
-        {
-            Debug.LogWarning(
-                "InteractPC: panelToOpen не назначена. Взаимодействие продолжит работу без панели.",
-                this);
-            return;
-        }
+        
 
         if (panelToOpen.activeInHierarchy)
             return;
@@ -112,19 +106,22 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
         if (objCam != null)
             objCam.Priority = 0;
 
-        if (panelToOpen != null)
-            panelToOpen.SetActive(false);
+
+        panelToOpen.SetActive(false);
         _isInteracting = false;
         ApplyHighlightValue(normalValue);
     }
     private void ApplyHighlightValue(float value)
     {
         if (_outlineMaterial != null)
-        {
             _outlineMaterial.SetFloat(propertyName, value);
-            _outlineMaterial.SetColor(
-                "_OutLine_Color",
-                value == 0 ? Color.black : Color.white);
+        if(value == 0)
+        {
+            _outlineMaterial.SetColor("_OutLine_Color",Color.black);
+        }
+        else
+        {
+            _outlineMaterial.SetColor("_OutLine_Color",Color.white);
         }
     }
 }

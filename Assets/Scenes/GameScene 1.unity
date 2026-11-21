@@ -4484,7 +4484,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BedSleepTrigger
   morningReportPanel: {fileID: 103973958}
-  defeatScreenPanel: {fileID: 327765798}
+  defeatScreenPanel: {fileID: 0}
   fadePanel: {fileID: 1198264632}
   characterManager: {fileID: 161889489}
   fadeDuration: 1

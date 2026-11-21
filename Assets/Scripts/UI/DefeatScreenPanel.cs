@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class DefeatScreenPanel : MonoBehaviour
 {
-    public static DefeatScreenPanel Instance { get; private set; }
-
     [Header("Анимация Aseprite")]
     [SerializeField] private Image animationImage;
     [SerializeField] private Sprite[] animationFrames;
@@ -26,8 +24,6 @@ public class DefeatScreenPanel : MonoBehaviour
 
     private void Awake()
     {
-        Instance = this;
-
         if (restartButton != null)
         {
             restartButton.onClick.RemoveListener(RestartGame);
@@ -42,12 +38,7 @@ public class DefeatScreenPanel : MonoBehaviour
 
         ShowDefeat();
 
-    }
-
-    private void OnDestroy()
-    {
-        if (Instance == this)
-            Instance = null;
+        gameObject.SetActive(false);
     }
 
     private void OnEnable()
@@ -89,19 +80,6 @@ public class DefeatScreenPanel : MonoBehaviour
 
     public void Show()
     {
-        if (titleText != null)
-            titleText.text = "ПОРАЖЕНИЕ";
-        if (subtitleText != null)
-            subtitleText.text = "Все жители погибли";
-        gameObject.SetActive(true);
-    }
-
-    public void ShowVictory()
-    {
-        if (titleText != null)
-            titleText.text = "ПОБЕДА";
-        if (subtitleText != null)
-            subtitleText.text = "Вы пережили 10 дней";
         gameObject.SetActive(true);
     }
 
