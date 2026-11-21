@@ -16,7 +16,11 @@ MonoBehaviour:
   locationName: "Заброшенный магазин"
   locationImage: {fileID: 0}
   description: "Пустовавший ещё до катастрофы продуктовый магазин на окраине города. Полки в зале разграблены, но в подсобке, холодильниках и arrière-комнатах могут остаться консервы, сухие рационы и бутилированная вода."
-  riskDescription: "Потолок частично обрушен. Возможны обвалы, битое стекло и встреча с дикими псами, которые облюбовали здание."
+  riskDescription: "Уровень опасности: ниже среднего. Шанс ранения: ~25% (урон 10–30 HP). Шанс гибели: ~8%. Допустимый риск для одиночного выжившего."
+  injuryChancePercent: 25
+  deathChancePercent: 8
+  minInjuryDamage: 10
+  maxInjuryDamage: 30
   durationDays: 3
   possibleRewards:
   - resourceType: 0

@@ -16,7 +16,11 @@ MonoBehaviour:
   locationName: "Склад МЧС"
   locationImage: {fileID: 0}
   description: "Экстренный склад ведомства по чрезвычайным ситуациях. Размещены стратегические запасы продовольствия и воды для гражданской обороны."
-  riskDescription: "Охраняется автоматическими системами и прочными замками. Возможны ловушки, завалы и срабатывание сигнализации."
+  riskDescription: "Уровень опасности: средняя. Шанс ранения: ~35% (урон 15–35 HP). Шанс гибели: ~10%. Охраняется автоматическими системами и прочными замками."
+  injuryChancePercent: 35
+  deathChancePercent: 10
+  minInjuryDamage: 15
+  maxInjuryDamage: 35
   durationDays: 3
   possibleRewards:
   - resourceType: 0

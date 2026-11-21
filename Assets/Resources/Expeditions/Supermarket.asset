@@ -16,7 +16,11 @@ MonoBehaviour:
   locationName: "Супермаркет"
   locationImage: {fileID: 0}
   description: "Крупный продуктовый супермаркет в центре района. Много еды, но большая часть уже испортилась или разобрана мародёрами."
-  riskDescription: "Толпы мародёров уже побывали здесь. Шанс встречи с враждебными выжившими и грабителями."
+  riskDescription: "Уровень опасности: низкая. Шанс ранения: ~20% (урон 10–25 HP). Шанс гибели: ~5%. Подходит для первой вылазки и ослабленных персонажей."
+  injuryChancePercent: 20
+  deathChancePercent: 5
+  minInjuryDamage: 10
+  maxInjuryDamage: 25
   durationDays: 2
   possibleRewards:
   - resourceType: 0

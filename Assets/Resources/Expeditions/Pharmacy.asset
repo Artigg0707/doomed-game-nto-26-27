@@ -16,7 +16,11 @@ MonoBehaviour:
   locationName: "Аптека"
   locationImage: {fileID: 0}
   description: "Районная аптека с остатками лекарств, бинтов, дезинфицирующих средств и витаминов. Ценна прежде всего для раненых и больных жителей бункера."
-  riskDescription: "Сигнализация может быть ещё активна. На полках осталось мало, но то, что сохранилось — критически важно."
+  riskDescription: "Уровень опасности: средняя. Шанс ранения: ~35% (урон 15–35 HP). Шанс гибели: ~10%. Требует осторожности и preferably подходящего специалиста."
+  injuryChancePercent: 35
+  deathChancePercent: 10
+  minInjuryDamage: 15
+  maxInjuryDamage: 35
   durationDays: 2
   possibleRewards:
   - resourceType: 0

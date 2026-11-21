@@ -16,7 +16,11 @@ MonoBehaviour:
   locationName: "ТЭЦ"
   locationImage: {fileID: 0}
   description: "Теплоэлектроцентраль на окраине города. Огромные цистерны с топливом и запчастями для генераторов. Объект сложно проникнуть и ещё сложнее выбраться."
-  riskDescription: "Высокий риск обрушений, утечки газа и встречи с патрулями или враждебными выжившими. Экспедиция длительная и опасная."
+  riskDescription: "Уровень опасности: высокая. Шанс ранения: ~45% (урон 20–40 HP). Шанс гибели: ~25%. Только для подготовленной группы с ветераном или механиком."
+  injuryChancePercent: 45
+  deathChancePercent: 25
+  minInjuryDamage: 20
+  maxInjuryDamage: 40
   durationDays: 4
   possibleRewards:
   - resourceType: 0
