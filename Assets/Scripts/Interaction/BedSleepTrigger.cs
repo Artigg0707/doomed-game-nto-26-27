@@ -15,17 +15,40 @@ public class BedSleepTrigger : MonoBehaviour
 
     private bool _isSleeping = false;
     private NightReportData _pendingReport;
+    private bool _defeatOccurred;
+    private bool _victoryOccurred;
+
+    private void Start()
+    {
+        SubscribeToCycleEvents();
+    }
 
     private void OnEnable()
     {
-        if (DayCycleManager.Instance != null)
-            DayCycleManager.Instance.OnNightComplete += OnNightComplete;
+        SubscribeToCycleEvents();
     }
 
     private void OnDisable()
     {
         if (DayCycleManager.Instance != null)
+        {
             DayCycleManager.Instance.OnNightComplete -= OnNightComplete;
+            DayCycleManager.Instance.OnDefeat -= OnDefeat;
+            DayCycleManager.Instance.OnVictory -= OnVictory;
+        }
+    }
+
+    private void SubscribeToCycleEvents()
+    {
+        if (DayCycleManager.Instance == null)
+            return;
+
+        DayCycleManager.Instance.OnNightComplete -= OnNightComplete;
+        DayCycleManager.Instance.OnNightComplete += OnNightComplete;
+        DayCycleManager.Instance.OnDefeat -= OnDefeat;
+        DayCycleManager.Instance.OnDefeat += OnDefeat;
+        DayCycleManager.Instance.OnVictory -= OnVictory;
+        DayCycleManager.Instance.OnVictory += OnVictory;
     }
 
     public void OnSleepButtonClicked()
@@ -36,6 +59,8 @@ public class BedSleepTrigger : MonoBehaviour
             return;
         }
 
+        _defeatOccurred = false;
+        _victoryOccurred = false;
         Debug.Log("[BedSleepTrigger] Нажата кнопка Спать, начинаем последовательность сна.");
         StartCoroutine(SleepSequence());
     }
@@ -87,19 +112,34 @@ public class BedSleepTrigger : MonoBehaviour
 
         yield return new WaitForSeconds(0.3f);
 
-        if (DayCycleManager.Instance != null &&
-            DayCycleManager.Instance.IsDefeat())
+        if (_defeatOccurred ||
+            (DayCycleManager.Instance != null &&
+             DayCycleManager.Instance.IsDefeat()))
         {
-            if (defeatScreenPanel != null)
-            {
-                defeatScreenPanel.Show();
-            }
+            DefeatScreenPanel panel = defeatScreenPanel != null
+                ? defeatScreenPanel
+                : DefeatScreenPanel.Instance;
+
+            if (panel != null)
+                panel.Show();
             else
-            {
-                Debug.LogError(
-                    "DefeatScreenPanel не назначен на BedSleepTrigger.",
-                    this);
-            }
+                Debug.LogError("DefeatScreenPanel не найден.", this);
+
+            yield break;
+        }
+
+        if (_victoryOccurred ||
+            (DayCycleManager.Instance != null &&
+             DayCycleManager.Instance.IsVictory()))
+        {
+            DefeatScreenPanel panel = defeatScreenPanel != null
+                ? defeatScreenPanel
+                : DefeatScreenPanel.Instance;
+
+            if (panel != null)
+                panel.ShowVictory();
+            else
+                Debug.LogError("DefeatScreenPanel не найден.", this);
 
             yield break;
         }
@@ -141,14 +181,14 @@ public class BedSleepTrigger : MonoBehaviour
                         _pendingReport.survivalChanges.Add($"{c.fullName}: {foodState}, {waterState}, {c.health} HP, мораль {c.morale} ({healthState}).");
 
                         if (c.daysWithoutFood == 1)
-                            _pendingReport.survivalChanges.Add($"  ↳ мораль −10 (голод 1 день)");
+                            _pendingReport.survivalChanges.Add("  -> мораль -10 (голод 1 день)");
                         else if (c.daysWithoutFood >= 2)
-                            _pendingReport.survivalChanges.Add($"  ↳ Истощен! −25 HP, −20 мораль.");
+                            _pendingReport.survivalChanges.Add("  -> Истощен! -25 HP, -20 мораль.");
 
                         if (c.daysWithoutWater == 1)
-                            _pendingReport.survivalChanges.Add($"  ↳ мораль −15 (жажда 1 день)");
+                            _pendingReport.survivalChanges.Add("  -> мораль -15 (жажда 1 день)");
                         else if (c.daysWithoutWater >= 2)
-                            _pendingReport.survivalChanges.Add($"  ↳ Обезвоживание! −40 HP.");
+                            _pendingReport.survivalChanges.Add("  -> Обезвоживание! -40 HP.");
                     }
 
                     if (resources != null)
@@ -179,6 +219,16 @@ public class BedSleepTrigger : MonoBehaviour
     {
         _pendingReport = report;
         Debug.Log($"[BedSleepTrigger] Получен отчёт ночи. День: {report.newDay}, Событий: {report.HasAnyEvents}");
+    }
+
+    private void OnDefeat()
+    {
+        _defeatOccurred = true;
+    }
+
+    private void OnVictory()
+    {
+        _victoryOccurred = true;
     }
 
     private void OnSummaryContinued()

@@ -4,6 +4,7 @@ using UnityEngine;
 public class DayCycleManager : MonoBehaviour
 {
     private const int MoralePenaltyPerDeath = 10;
+    private const int VictoryDay = 10;
 
     public static DayCycleManager Instance { get; private set; }
 
@@ -15,6 +16,7 @@ public class DayCycleManager : MonoBehaviour
     public event Action<int> OnDayChanged;
     public event Action<NightReportData> OnNightComplete;
     public event Action OnDefeat;
+    public event Action OnVictory;
 
     private void Awake()
     {
@@ -31,6 +33,9 @@ public class DayCycleManager : MonoBehaviour
 
         if (characterManager == null)
             characterManager = GetComponent<CharacterManager>();
+
+        if (characterManager == null)
+            characterManager = FindObjectOfType<CharacterManager>();
 
         ResourceManager resources = ResourceManager.Instance;
 
@@ -119,13 +124,22 @@ public class DayCycleManager : MonoBehaviour
         OnNightComplete?.Invoke(report);
 
         if (IsDefeat())
+        {
             OnDefeat?.Invoke();
+        }
+        else if (report.completedDay >= VictoryDay)
+        {
+            OnVictory?.Invoke();
+        }
 
         Debug.Log($"Started next day: {CurrentDay}");
     }
 
     public bool IsDefeat()
     {
+        if (characterManager == null)
+            characterManager = FindObjectOfType<CharacterManager>();
+
         if (characterManager == null)
             return false;
 
@@ -143,6 +157,16 @@ public class DayCycleManager : MonoBehaviour
         }
 
         return true;
+    }
+
+    public bool IsVictory()
+    {
+        return !IsDefeat() && GetCompletedDay() >= VictoryDay;
+    }
+
+    private int GetCompletedDay()
+    {
+        return Mathf.Max(0, CurrentDay - 1);
     }
 
     private void UpdateSurvivalCounters(
@@ -194,7 +218,7 @@ public class DayCycleManager : MonoBehaviour
                 {
                     character.morale -= 10;
                     report.survivalChanges.Add(
-                        "  ↳ мораль −10 (голод 1 день)");
+                        "  -> мораль -10 (голод 1 день)");
                 }
                 else if (character.daysWithoutFood >= 2)
                 {
@@ -202,7 +226,7 @@ public class DayCycleManager : MonoBehaviour
                     character.morale -= 20;
 
                     report.survivalChanges.Add(
-                        "  ↳ Истощен! −25 HP, −20 мораль.");
+                        "  -> Истощен! -25 HP, -20 мораль.");
 
                     if (character.health <= 0)
                     {
@@ -219,14 +243,14 @@ public class DayCycleManager : MonoBehaviour
                 {
                     character.morale -= 15;
                     report.survivalChanges.Add(
-                        "  ↳ мораль −15 (жажда 1 день)");
+                        "  -> мораль -15 (жажда 1 день)");
                 }
                 else if (character.daysWithoutWater >= 2)
                 {
                     character.health -= 40;
 
                     report.survivalChanges.Add(
-                        "  ↳ Обезвоживание! −40 HP.");
+                        "  -> Обезвоживание! -40 HP.");
 
                     if (character.health <= 0)
                     {
@@ -244,7 +268,7 @@ public class DayCycleManager : MonoBehaviour
                     character.health -= coldDamage;
 
                     report.survivalChanges.Add(
-                        $"  ↳ Мороз, −{coldDamage} HP.");
+                        $"  -> Мороз, -{coldDamage} HP.");
 
                     if (character.health <= 0)
                     {

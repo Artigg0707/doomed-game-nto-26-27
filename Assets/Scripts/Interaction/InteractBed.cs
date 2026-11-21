@@ -15,6 +15,8 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
     private Material _outlineMaterial;
     private bool _isSleeping = false;
     private NightReportData _pendingReport;
+    private bool _defeatOccurred;
+    private bool _victoryOccurred;
 
     private void Start()
     {
@@ -27,18 +29,36 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
 
         if (fadePanel != null)
             fadePanel.alpha = 0f;
+
+        SubscribeToCycleEvents();
     }
 
     private void OnEnable()
     {
-        if (DayCycleManager.Instance != null)
-            DayCycleManager.Instance.OnNightComplete += OnNightComplete;
+        SubscribeToCycleEvents();
     }
 
     private void OnDisable()
     {
         if (DayCycleManager.Instance != null)
+        {
             DayCycleManager.Instance.OnNightComplete -= OnNightComplete;
+            DayCycleManager.Instance.OnDefeat -= OnDefeat;
+            DayCycleManager.Instance.OnVictory -= OnVictory;
+        }
+    }
+
+    private void SubscribeToCycleEvents()
+    {
+        if (DayCycleManager.Instance == null)
+            return;
+
+        DayCycleManager.Instance.OnNightComplete -= OnNightComplete;
+        DayCycleManager.Instance.OnNightComplete += OnNightComplete;
+        DayCycleManager.Instance.OnDefeat -= OnDefeat;
+        DayCycleManager.Instance.OnDefeat += OnDefeat;
+        DayCycleManager.Instance.OnVictory -= OnVictory;
+        DayCycleManager.Instance.OnVictory += OnVictory;
     }
 
     public void Interact()
@@ -46,6 +66,8 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
         if (_isSleeping || morningReportPanel == null)
             return;
 
+        _defeatOccurred = false;
+        _victoryOccurred = false;
         StartCoroutine(SleepSequence());
     }
 
@@ -81,19 +103,34 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
         // Небольшая пауза, чтобы отчет успел сформироваться
         yield return new WaitForSeconds(0.3f);
 
-        if (DayCycleManager.Instance != null &&
-            DayCycleManager.Instance.IsDefeat())
+        if (_defeatOccurred ||
+            (DayCycleManager.Instance != null &&
+             DayCycleManager.Instance.IsDefeat()))
         {
-            if (defeatScreenPanel != null)
-            {
-                defeatScreenPanel.Show();
-            }
+            DefeatScreenPanel panel = defeatScreenPanel != null
+                ? defeatScreenPanel
+                : DefeatScreenPanel.Instance;
+
+            if (panel != null)
+                panel.Show();
             else
-            {
-                Debug.LogError(
-                    "DefeatScreenPanel не назначен на InteractBed.",
-                    this);
-            }
+                Debug.LogError("DefeatScreenPanel не найден.", this);
+
+            yield break;
+        }
+
+        if (_victoryOccurred ||
+            (DayCycleManager.Instance != null &&
+             DayCycleManager.Instance.IsVictory()))
+        {
+            DefeatScreenPanel panel = defeatScreenPanel != null
+                ? defeatScreenPanel
+                : DefeatScreenPanel.Instance;
+
+            if (panel != null)
+                panel.ShowVictory();
+            else
+                Debug.LogError("DefeatScreenPanel не найден.", this);
 
             yield break;
         }
@@ -113,6 +150,16 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
     private void OnNightComplete(NightReportData report)
     {
         _pendingReport = report;
+    }
+
+    private void OnDefeat()
+    {
+        _defeatOccurred = true;
+    }
+
+    private void OnVictory()
+    {
+        _victoryOccurred = true;
     }
 
     private void OnSummaryContinued()

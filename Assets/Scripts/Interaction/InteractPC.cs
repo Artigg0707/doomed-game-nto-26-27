@@ -20,8 +20,9 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
 
     void Start()
     {
-        Renderer renderer = GetComponent<Renderer>();
-        panelToOpen.SetActive(false);
+        Renderer renderer = GetComponentInChildren<Renderer>(true);
+        if (panelToOpen != null)
+            panelToOpen.SetActive(false);
         if (renderer != null)
         {
             Material[] mats = renderer.materials;
@@ -56,14 +57,14 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
 
     public void Interact()
     {
-        
         if (objCam != null)
             objCam.Priority = 20;
 
         _isInteracting = true;
         ApplyHighlightValue(normalValue);
 
-        
+        if (panelToOpen == null)
+            return;
 
         if (panelToOpen.activeInHierarchy)
             return;
@@ -106,8 +107,8 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
         if (objCam != null)
             objCam.Priority = 0;
 
-
-        panelToOpen.SetActive(false);
+        if (panelToOpen != null)
+            panelToOpen.SetActive(false);
         _isInteracting = false;
         ApplyHighlightValue(normalValue);
     }
