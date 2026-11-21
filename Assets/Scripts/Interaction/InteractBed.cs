@@ -86,7 +86,24 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
         {
             if (defeatScreenPanel != null)
             {
-                defeatScreenPanel.Show();
+                defeatScreenPanel.ShowDefeat();
+            }
+            else
+            {
+                Debug.LogError(
+                    "DefeatScreenPanel не назначен на InteractBed.",
+                    this);
+            }
+
+            yield break;
+        }
+
+        if (DayCycleManager.Instance != null &&
+            DayCycleManager.Instance.IsVictory())
+        {
+            if (defeatScreenPanel != null)
+            {
+                defeatScreenPanel.ShowVictory();
             }
             else
             {

@@ -21,7 +21,8 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
     void Start()
     {
         Renderer renderer = GetComponent<Renderer>();
-        panelToOpen.SetActive(false);
+        if (panelToOpen != null)
+            panelToOpen.SetActive(false);
         if (renderer != null)
         {
             Material[] mats = renderer.materials;
@@ -46,8 +47,7 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
 
         // ������� ���������� ��������� ����� �������� ������.
         if (_isInteracting &&
-            panelToOpen != null &&
-            !panelToOpen.activeInHierarchy)
+            (panelToOpen == null || !panelToOpen.activeInHierarchy))
         {
             _isInteracting = false;
             ApplyHighlightValue(normalValue);
@@ -65,12 +65,12 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
 
         
 
-        if (panelToOpen.activeInHierarchy)
+        if (panelToOpen != null && panelToOpen.activeInHierarchy)
             return;
 
         if (_panelOpener != null)
             _panelOpener.Open();
-        else
+        else if (panelToOpen != null)
             panelToOpen.SetActive(true);
     }
 
@@ -107,21 +107,24 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
             objCam.Priority = 0;
 
 
-        panelToOpen.SetActive(false);
+        if (panelToOpen != null)
+            panelToOpen.SetActive(false);
         _isInteracting = false;
         ApplyHighlightValue(normalValue);
     }
     private void ApplyHighlightValue(float value)
     {
         if (_outlineMaterial != null)
+        {
             _outlineMaterial.SetFloat(propertyName, value);
-        if(value == 0)
-        {
-            _outlineMaterial.SetColor("_OutLine_Color",Color.black);
-        }
-        else
-        {
-            _outlineMaterial.SetColor("_OutLine_Color",Color.white);
+            if(value == 0)
+            {
+                _outlineMaterial.SetColor("_OutLine_Color",Color.black);
+            }
+            else
+            {
+                _outlineMaterial.SetColor("_OutLine_Color",Color.white);
+            }
         }
     }
 }

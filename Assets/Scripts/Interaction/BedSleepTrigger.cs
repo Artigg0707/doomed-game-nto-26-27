@@ -92,7 +92,24 @@ public class BedSleepTrigger : MonoBehaviour
         {
             if (defeatScreenPanel != null)
             {
-                defeatScreenPanel.Show();
+                defeatScreenPanel.ShowDefeat();
+            }
+            else
+            {
+                Debug.LogError(
+                    "DefeatScreenPanel не назначен на BedSleepTrigger.",
+                    this);
+            }
+
+            yield break;
+        }
+
+        if (DayCycleManager.Instance != null &&
+            DayCycleManager.Instance.IsVictory())
+        {
+            if (defeatScreenPanel != null)
+            {
+                defeatScreenPanel.ShowVictory();
             }
             else
             {

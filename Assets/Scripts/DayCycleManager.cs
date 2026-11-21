@@ -15,6 +15,7 @@ public class DayCycleManager : MonoBehaviour
     public event Action<int> OnDayChanged;
     public event Action<NightReportData> OnNightComplete;
     public event Action OnDefeat;
+    public event Action OnVictory;
 
     private void Awake()
     {
@@ -120,6 +121,8 @@ public class DayCycleManager : MonoBehaviour
 
         if (IsDefeat())
             OnDefeat?.Invoke();
+        else if (report.completedDay >= 10 && IsVictory())
+            OnVictory?.Invoke();
 
         Debug.Log($"Started next day: {CurrentDay}");
     }
@@ -143,6 +146,27 @@ public class DayCycleManager : MonoBehaviour
         }
 
         return true;
+    }
+
+    public bool IsVictory()
+    {
+        if (characterManager == null)
+            return false;
+
+        if (characterManager.characters == null)
+            return false;
+
+        foreach (GeneratedCharacter character in characterManager.characters)
+        {
+            if (character != null &&
+                !character.isDead &&
+                !character.isExiled)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void UpdateSurvivalCounters(

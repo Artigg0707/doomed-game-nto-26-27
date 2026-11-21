@@ -36,11 +36,7 @@ public class DefeatScreenPanel : MonoBehaviour
             quitButton.onClick.AddListener(QuitGame);
         }
 
-        if (titleText != null)
-            titleText.text = "ПОРАЖЕНИЕ";
-
-        if (subtitleText != null)
-            subtitleText.text = "Все жители погибли";
+        ShowDefeat();
 
         gameObject.SetActive(false);
     }
@@ -85,6 +81,28 @@ public class DefeatScreenPanel : MonoBehaviour
     public void Show()
     {
         gameObject.SetActive(true);
+    }
+
+    public void ShowVictory()
+    {
+        if (titleText != null)
+            titleText.text = "ПОБЕДА";
+
+        if (subtitleText != null)
+            subtitleText.text = "Вы дождались гуманитарного конвоя.";
+
+        Show();
+    }
+
+    public void ShowDefeat()
+    {
+        if (titleText != null)
+            titleText.text = "ПОРАЖЕНИЕ";
+
+        if (subtitleText != null)
+            subtitleText.text = "Все жители погибли";
+
+        Show();
     }
 
     public void Hide()
