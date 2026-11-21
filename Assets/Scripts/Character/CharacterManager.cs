@@ -225,9 +225,46 @@ public class CharacterManager : MonoBehaviour
         }
         else
         {
-            cardRect.anchoredPosition3D = Vector3.zero;
-            Debug.LogWarning("Не удалось найти свободное место для карточки персонажа.", this);
+            Vector2 gridPosition = FindGridFallbackPosition(cardRect);
+            cardRect.anchoredPosition3D = new Vector3(
+                gridPosition.x,
+                gridPosition.y,
+                0f);
         }
+    }
+
+    private Vector2 FindGridFallbackPosition(RectTransform newCard)
+    {
+        Rect area = cardContainer.rect;
+        float cardWidth = Mathf.Max(newCard.rect.width, 100f);
+        float cardHeight = Mathf.Max(newCard.rect.height, 100f);
+        float stepX = cardWidth + cardSpacing;
+        float stepY = cardHeight + cardSpacing;
+
+        int columns = Mathf.Max(
+            1,
+            Mathf.FloorToInt(
+                (area.width - edgePadding * 2f + cardSpacing) /
+                stepX));
+
+        CharacterCardUI[] cards =
+            cardContainer.GetComponentsInChildren<CharacterCardUI>(true);
+        int index = Mathf.Max(0, cards.Length - 1);
+        int column = index % columns;
+        int row = index / columns;
+
+        float startX =
+            -area.width * 0.5f +
+            edgePadding +
+            cardWidth * 0.5f;
+        float startY =
+            area.height * 0.5f -
+            edgePadding -
+            cardHeight * 0.5f;
+
+        return new Vector2(
+            startX + column * stepX,
+            startY - row * stepY);
     }
 
     private void RemoveInactiveCharacterCards()
