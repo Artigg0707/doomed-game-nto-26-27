@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class DayCycleManager : MonoBehaviour
@@ -159,6 +159,35 @@ public class DayCycleManager : MonoBehaviour
         return true;
     }
 
+    public string GetDefeatReason()
+    {
+        if (characterManager == null)
+            characterManager = FindObjectOfType<CharacterManager>();
+
+        if (characterManager == null || characterManager.characters == null)
+            return "Игра окончена";
+
+        int deadCount = 0;
+        int exiledCount = 0;
+        int totalAlive = 0;
+
+        foreach (GeneratedCharacter character in characterManager.characters)
+        {
+            if (character == null) continue;
+            if (character.isDead) deadCount++;
+            if (character.isExiled) exiledCount++;
+            if (!character.isDead && !character.isExiled) totalAlive++;
+        }
+
+        if (totalAlive == 0 && deadCount > 0 && exiledCount > 0)
+            return "Все погибли и ушли";
+        if (totalAlive == 0 && deadCount > 0)
+            return "Все погибли";
+        if (totalAlive == 0 && exiledCount > 0)
+            return "Все ушли из бункера";
+        return "Часть жителей ушла, часть осталась";
+    }
+
     public bool IsVictory()
     {
         return !IsDefeat() && GetCompletedDay() >= VictoryDay;
@@ -216,17 +245,28 @@ public class DayCycleManager : MonoBehaviour
                 // Голод.
                 if (character.daysWithoutFood == 1)
                 {
+                    report.survivalChanges.Add(
+                        "  -> Голод 1 день (без штрафа)");
+                }
+                else if (character.daysWithoutFood == 2)
+                {
+                    character.morale -= 5;
+                    report.survivalChanges.Add(
+                        "  -> мораль −5 (голод 2 дня)");
+                }
+                else if (character.daysWithoutFood == 3)
+                {
+                    character.health -= 10;
                     character.morale -= 10;
                     report.survivalChanges.Add(
-                        "  -> мораль -10 (голод 1 день)");
+                        "  -> Истощен! −10 HP, −10 мораль.");
                 }
-                else if (character.daysWithoutFood >= 2)
+                else if (character.daysWithoutFood >= 4)
                 {
-                    character.health -= 25;
-                    character.morale -= 20;
-
+                    character.health -= 15;
+                    character.morale -= 15;
                     report.survivalChanges.Add(
-                        "  -> Истощен! -25 HP, -20 мораль.");
+                        "  -> Критический голод! −15 HP, −15 мораль.");
 
                     if (character.health <= 0)
                     {
@@ -241,16 +281,30 @@ public class DayCycleManager : MonoBehaviour
                 // Жажда.
                 if (character.daysWithoutWater == 1)
                 {
+                    character.morale -= 5;
+                    report.survivalChanges.Add(
+                        "  -> мораль −5 (жажда 1 день)");
+                }
+                else if (character.daysWithoutWater == 2)
+                {
+                    character.health -= 5;
+                    character.morale -= 10;
+                    report.survivalChanges.Add(
+                        "  -> Обезвоживание: −5 HP, −10 morale.");
+                }
+                else if (character.daysWithoutWater == 3)
+                {
+                    character.health -= 15;
                     character.morale -= 15;
                     report.survivalChanges.Add(
-                        "  -> мораль -15 (жажда 1 день)");
+                        "  -> Сильное обезвоживание: −15 HP, −15 morale.");
                 }
-                else if (character.daysWithoutWater >= 2)
+                else if (character.daysWithoutWater >= 4)
                 {
-                    character.health -= 40;
-
+                    character.health -= 20;
+                    character.morale -= 15;
                     report.survivalChanges.Add(
-                        "  -> Обезвоживание! -40 HP.");
+                        "  -> Критическое обезвоживание: −20 HP, −15 morale.");
 
                     if (character.health <= 0)
                     {
@@ -259,21 +313,50 @@ public class DayCycleManager : MonoBehaviour
                     }
                 }
 
-                // Холод.
+                // Холод (генерирует урон только если нет топлива)
                 if (!character.isDead && resources.TemperatureLevel <= 1)
                 {
                     int coldDamage =
-                        resources.TemperatureLevel == 0 ? 35 : 15;
+                        resources.TemperatureLevel == 0 ? 30 : 15;
 
                     character.health -= coldDamage;
+                    character.morale -= 10;
 
                     report.survivalChanges.Add(
-                        $"  -> Мороз, -{coldDamage} HP.");
+                        $"  -> Мороз, −{coldDamage} HP, −10 мораль.");
 
                     if (character.health <= 0)
                     {
                         character.isDead = true;
                         report.deaths.Add(character.fullName);
+                    }
+                }
+
+                // Восстановление после сна: +5 HP и +5 morale, если 2 дня подряд получал еду или воду
+                if (!character.isDead)
+                {
+                    bool foodRecovery = character.consecutiveFoodDays >= 2;
+                    bool waterRecovery = character.consecutiveWaterDays >= 2;
+
+                    if (foodRecovery || waterRecovery)
+                    {
+                        bool hpRecovered = false;
+                        bool moraleRecovered = false;
+
+                        if (character.health < 100)
+                        {
+                            character.health = Mathf.Min(100, character.health + 5);
+                            hpRecovered = true;
+                        }
+                        if (character.morale < 100)
+                        {
+                            character.morale = Mathf.Min(100, character.morale + 5);
+                            moraleRecovered = true;
+                        }
+
+                        string recoverySource = foodRecovery && waterRecovery ? "еду и воду" : (foodRecovery ? "еду" : "воду");
+                        report.survivalChanges.Add(
+                            $"  -> Восстановление после сна ({recoverySource}): +5 HP, +5 morale.");
                     }
                 }
             }

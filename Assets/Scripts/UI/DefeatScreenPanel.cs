@@ -105,18 +105,92 @@ public class DefeatScreenPanel : MonoBehaviour
         if (subtitleText != null)
             subtitleText.text = "Вы дождались гуманитарного конвоя.";
 
-        Show();
+        gameObject.SetActive(true);
+    }
+
+    public void ShowCustomDefeatReason(string reason, string subtitle = null)
+    {
+        if (titleText != null)
+            titleText.text = reason;
+
+        if (subtitleText != null)
+            subtitleText.text = subtitle != null ? subtitle : reason;
+
+        gameObject.SetActive(true);
     }
 
     public void ShowDefeat()
     {
+        ShowCustomDefeatReason("Все жители погибли");
+    }
+
+    public void ShowVictoryWithStory(int daysSurvived, int survivorsCount, int deathsCount, int exiledCount)
+    {
         if (titleText != null)
-            titleText.text = "ПОРАЖЕНИЕ";
+            titleText.text = "ПОБЕДА";
+
+        string story;
+        if (survivorsCount > 0)
+        {
+            story = $"Прожито дней: {daysSurvived}\n" +
+                    $"Выжило людей: {survivorsCount}\n" +
+                    $"Погибло: {deathsCount}\n" +
+                    $"Ушло из бункера: {exiledCount}\n\n" +
+                    $"Вы дождались спасения. Гуманитарный конвой доставил еду, воду и лекарства.\n" +
+                    $"Бункер выstood. Вы прошли путь от отчаяния к надежде.";
+        }
+        else
+        {
+            story = $"Прожито дней: {daysSurvived}\n" +
+                    $"Выжило людей: 0\n" +
+                    $"Погибло: {deathsCount}\n" +
+                    $"Ушло из бункера: {exiledCount}\n\n" +
+                    $"Конвой прибыл слишком поздно. Бункер пуст.";
+        }
 
         if (subtitleText != null)
-            subtitleText.text = "Все жители погибли";
+            subtitleText.text = story;
 
-        Show();
+        gameObject.SetActive(true);
+    }
+
+    public void ShowDefeatWithStory(int daysSurvived, int survivorsCount, int deathsCount, int exiledCount, string defeatReason)
+    {
+        if (titleText != null)
+            titleText.text = defeatReason;
+
+        string story = $"Прожито дней: {daysSurvived}\n" +
+                       $"Выжило людей: {survivorsCount}\n" +
+                       $"Погибло: {deathsCount}\n" +
+                       $"Ушло из бункера: {exiledCount}\n\n";
+
+        string ending;
+        if (deathsCount > 0 && exiledCount > 0)
+        {
+            ending = "Бункер пал. Некоторые жители пали в бою за выживание, другие не выдержали и ушли в пустошь.\n" +
+                     "Надежда исчезла вместе с последними огнями.";
+        }
+        else if (deathsCount > 0)
+        {
+            ending = "Все жители погибли. Голод, холод и болезни одержали верх над последней группой выживших.\n" +
+                     "Бункер замолчал навсегда.";
+        }
+        else if (exiledCount > 0)
+        {
+            ending = "Все жители ушли из бункера. Мораль полностью иссякла, и никто больше не верил в спасение.\n" +
+                     "Пустошь поглотила всех, кто曾经 называл этот дом своим.";
+        }
+        else
+        {
+            ending = "Игра окончена. В бункере больше не осталось никого.";
+        }
+
+        story += ending;
+
+        if (subtitleText != null)
+            subtitleText.text = story;
+
+        gameObject.SetActive(true);
     }
 
     public void Hide()

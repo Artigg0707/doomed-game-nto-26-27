@@ -103,11 +103,13 @@ public class CharacterManager : MonoBehaviour
             {
                 return false;
             }
+            character.consecutiveFoodDays++;
         }
         else
         {
             if (ResourceManager.Instance != null)
                 ResourceManager.Instance.AddFood(1);
+            character.consecutiveFoodDays = 0;
         }
 
         character.receivesFoodToday = receivesFood;
@@ -130,11 +132,13 @@ public class CharacterManager : MonoBehaviour
             {
                 return false;
             }
+            character.consecutiveWaterDays++;
         }
         else
         {
             if (ResourceManager.Instance != null)
                 ResourceManager.Instance.AddWater(1);
+            character.consecutiveWaterDays = 0;
         }
 
         character.receivesWaterToday = receivesWater;

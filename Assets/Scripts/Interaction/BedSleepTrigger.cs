@@ -21,6 +21,32 @@ public class BedSleepTrigger : MonoBehaviour
     private void Start()
     {
         SubscribeToCycleEvents();
+
+        if (fadePanel == null)
+        {
+            Transform fadeChild = transform.Find("FadePAnel");
+            if (fadeChild != null)
+                fadePanel = fadeChild.GetComponent<CanvasGroup>();
+
+            if (fadePanel == null)
+            {
+                CanvasGroup[] cgs = GetComponentsInChildren<CanvasGroup>(true);
+                foreach (var cg in cgs)
+                {
+                    if (cg.name.Contains("Fade", System.StringComparison.OrdinalIgnoreCase) ||
+                        cg.name.Contains("Панел", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        fadePanel = cg;
+                        break;
+                    }
+                }
+            }
+
+            if (fadePanel != null)
+                Debug.Log("[BedSleepTrigger] FadePanel найден автоматически: " + fadePanel.name);
+            else
+                Debug.LogWarning("[BedSleepTrigger] FadePanel не найден! Назначьте в инспекторе.");
+        }
     }
 
     private void OnEnable()
@@ -121,7 +147,26 @@ public class BedSleepTrigger : MonoBehaviour
                 : DefeatScreenPanel.Instance;
 
             if (panel != null)
-                panel.Show();
+            {
+                int daysSurvived = DayCycleManager.Instance.CurrentDay - 1;
+                int survivorsCount = 0;
+                int deathsCount = 0;
+                int exiledCount = 0;
+
+                if (characterManager != null)
+                {
+                    foreach (var c in characterManager.characters)
+                    {
+                        if (c == null) continue;
+                        if (c.isDead) deathsCount++;
+                        else if (c.isExiled) exiledCount++;
+                        else survivorsCount++;
+                    }
+                }
+
+                string defeatReason = DayCycleManager.Instance.GetDefeatReason();
+                panel.ShowDefeatWithStory(daysSurvived, survivorsCount, deathsCount, exiledCount, defeatReason);
+            }
             else
                 Debug.LogError("DefeatScreenPanel не найден.", this);
 
@@ -137,7 +182,25 @@ public class BedSleepTrigger : MonoBehaviour
                 : DefeatScreenPanel.Instance;
 
             if (panel != null)
-                panel.ShowVictory();
+            {
+                int daysSurvived = DayCycleManager.Instance.CurrentDay - 1;
+                int survivorsCount = 0;
+                int deathsCount = 0;
+                int exiledCount = 0;
+
+                if (characterManager != null)
+                {
+                    foreach (var c in characterManager.characters)
+                    {
+                        if (c == null) continue;
+                        if (c.isDead) deathsCount++;
+                        else if (c.isExiled) exiledCount++;
+                        else survivorsCount++;
+                    }
+                }
+
+                panel.ShowVictoryWithStory(daysSurvived, survivorsCount, deathsCount, exiledCount);
+            }
             else
                 Debug.LogError("DefeatScreenPanel не найден.", this);
 
@@ -206,7 +269,22 @@ public class BedSleepTrigger : MonoBehaviour
             }
 
             Debug.Log("[BedSleepTrigger] Показываем панель утренней сводки.");
-            morningReportPanel.Show(_pendingReport, OnSummaryContinued);
+
+            var reportPanel = morningReportPanel != null ? morningReportPanel : MorningReportPanel.Instance;
+            if (reportPanel != null)
+            {
+                reportPanel.Show(_pendingReport, OnSummaryContinued);
+            }
+            else
+            {
+                Debug.LogError("[BedSleepTrigger] MorningReportPanel не назначен и не найден на сцене!");
+                OnSummaryContinued();
+            }
+
+            if (fadePanel != null)
+            {
+                StartCoroutine(FadeOutRoutine());
+            }
         }
         else
         {
@@ -248,16 +326,35 @@ public class BedSleepTrigger : MonoBehaviour
     private IEnumerator FadeInRoutine()
     {
         Debug.Log("[BedSleepTrigger] Fade In запущен.");
+        float startAlpha = fadePanel != null ? fadePanel.alpha : 1f;
         float t = 0;
         while (t < fadeDuration)
         {
             t += Time.deltaTime / fadeDuration;
-            fadePanel.alpha = Mathf.Lerp(1, 0, t);
+            if (fadePanel != null)
+                fadePanel.alpha = Mathf.Lerp(startAlpha, 0, t);
             yield return null;
         }
-        fadePanel.alpha = 0f;
+        if (fadePanel != null)
+            fadePanel.alpha = 0f;
         Debug.Log("[BedSleepTrigger] Экран полностью прозрачный.");
         FinishSleep();
+    }
+
+    private IEnumerator FadeOutRoutine()
+    {
+        Debug.Log("[BedSleepTrigger] Fade Out запущен (скрываем черный экран).");
+        float t = 0;
+        while (t < fadeDuration)
+        {
+            t += Time.deltaTime / fadeDuration;
+            if (fadePanel != null)
+                fadePanel.alpha = Mathf.Lerp(1, 0, t);
+            yield return null;
+        }
+        if (fadePanel != null)
+            fadePanel.alpha = 0f;
+        Debug.Log("[BedSleepTrigger] Черный экран скрыт, сводка видна.");
     }
 
     private void FinishSleep()

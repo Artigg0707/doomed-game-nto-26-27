@@ -27,6 +27,10 @@ public class GeneratedCharacter
     [SerializeField] public bool receivesFoodToday = false;
     [SerializeField] public bool receivesWaterToday = false;
 
+    [Header("Счётчики подряд дней")]
+    [SerializeField] public int consecutiveFoodDays = 0;
+    [SerializeField] public int consecutiveWaterDays = 0;
+
     [Header("Состояние")]
     [SerializeField] public bool isDead = false;
     [SerializeField] public bool isExiled = false;

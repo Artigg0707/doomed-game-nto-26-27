@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using TMPro;
@@ -9,6 +9,24 @@ using UnityEngine.UI;
 
 public class MorningReportPanel : MonoBehaviour
 {
+    private static MorningReportPanel _instance;
+    public static MorningReportPanel Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = FindObjectOfType<MorningReportPanel>(true);
+                if (_instance == null)
+                {
+                    Debug.LogError("MorningReportPanel не найден на сцене!");
+                }
+            }
+            return _instance;
+        }
+        private set => _instance = value;
+    }
+
     [Header("UI")]
     [SerializeField] private TMP_Text titleText;
     [SerializeField] private TMP_Text bodyText;
@@ -28,7 +46,6 @@ public class MorningReportPanel : MonoBehaviour
 
     private void Awake()
     {
-        gameObject.SetActive(false);
         if (continueButton != null)
             continueButton.onClick.AddListener(OnContinueClicked);
     }
