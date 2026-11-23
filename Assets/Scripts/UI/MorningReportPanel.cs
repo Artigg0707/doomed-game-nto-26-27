@@ -142,6 +142,15 @@ public class MorningReportPanel : MonoBehaviour
                 sb.AppendLine($"► {e}");
         }
 
+        // События с генератором (поломка и ремонт)
+        if (r.specialEvents.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine("Генератор:");
+            foreach (var e in r.specialEvents)
+                sb.AppendLine($"► {e}");
+        }
+
         sb.AppendLine();
 
         // Итоговая строка

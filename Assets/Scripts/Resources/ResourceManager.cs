@@ -13,6 +13,31 @@ public class ResourceManager : MonoBehaviour
     public int TemperatureLevel => resourceData != null ? resourceData.temperatureLevel : 0;
     public bool GeneratorBroken => resourceData != null && resourceData.generatorBroken;
 
+    public bool GeneratorIsOn => resourceData != null && resourceData.generatorIsOn;
+
+    public string GeneratorStatus
+    {
+        get
+        {
+            if (resourceData == null)
+                return "Неизвестно";
+
+            if (resourceData.generatorBroken)
+                return "Сломан";
+
+            if (!resourceData.generatorIsOn)
+                return "Выключен";
+
+            if (resourceData.fuelCans <= 0)
+                return "Нет топлива";
+
+            return "Работает";
+        }
+    }
+
+    public bool CanTurnOnGenerator =>
+        resourceData != null && !resourceData.generatorBroken && resourceData.fuelCans > 0;
+
     public event Action OnResourcesChanged;
 
     private const int MinResourceCount = 0;
@@ -127,6 +152,18 @@ public class ResourceManager : MonoBehaviour
             return;
 
         resourceData.generatorBroken = false;
+        OnResourcesChanged?.Invoke();
+    }
+
+    public void SetGeneratorOn(bool on)
+    {
+        if (resourceData == null)
+            return;
+
+        if (on && resourceData.generatorBroken)
+            return;
+
+        resourceData.generatorIsOn = on;
         OnResourcesChanged?.Invoke();
     }
 

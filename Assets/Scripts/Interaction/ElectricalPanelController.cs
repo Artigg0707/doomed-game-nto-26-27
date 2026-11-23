@@ -1,115 +1,310 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using System.Collections;
 
 public class ElectricalPanelController : MonoBehaviour
 {
-    [Header("РќР°СЃС‚СЂРѕР№РєРё")]
+    [Header("Ссылки")]
     [SerializeField] private ResourceManager resourceManager;
-    [SerializeField] private int fuelCostPerNight = 1;
-    [SerializeField] private int repairAttemptLimit = 3;
+    [SerializeField] private CharacterManager characterManager;
+    [SerializeField] private ExpeditionManager expeditionManager;
 
-    [Header("РЎС‚Р°С‚СѓСЃ")]
-    public bool IsGeneratorWorking => !resourceManager.GeneratorBroken && resourceManager.FuelCans > 0;
+    [Header("Настройки генератора")]
+    [SerializeField, Range(0, 100)] private int baseBreakdownChancePercent = 15;
+    [SerializeField, Range(0, 100)] private int baseRepairSuccessChancePercent = 60;
+    [SerializeField, Range(0, 100)] private int baseRepairInjuryChancePercent = 25;
+    [SerializeField] private int repairFailureDamageHP = 15;
 
-    private int repairAttemptsThisSession = 0;
-    private bool generatorPermanentlyBroken = false;
+    [Header("Статус")]
+    public bool IsGeneratorWorking =>
+        resourceManager != null &&
+        !resourceManager.GeneratorBroken &&
+        resourceManager.GeneratorIsOn &&
+        resourceManager.FuelCans > 0;
+
+    public string GeneratorStatusText
+    {
+        get
+        {
+            if (resourceManager == null)
+                return "Неизвестно";
+            return resourceManager.GeneratorStatus;
+        }
+    }
 
     public event Action OnResourcesChanged;
+    public event Action OnGeneratorStatusChanged;
+
+    // Починка на следующий день (runtime-состояние, сбрасывается при разрешении)
+    private GeneratedCharacter pendingRepairCharacter;
+    private int pendingRepairDaySent = -1;
+
+    public GeneratedCharacter PendingRepairCharacter => pendingRepairCharacter;
+    public bool HasPendingRepair => pendingRepairCharacter != null;
 
     private void Awake()
     {
         if (resourceManager == null)
             resourceManager = ResourceManager.Instance;
+
+        if (characterManager == null)
+            characterManager = FindObjectOfType<CharacterManager>();
+
+        if (expeditionManager == null)
+            expeditionManager = FindObjectOfType<ExpeditionManager>();
     }
 
+    private void OnEnable()
+    {
+        if (resourceManager != null)
+            resourceManager.OnResourcesChanged += HandleResourcesChanged;
+    }
+
+    private void OnDisable()
+    {
+        if (resourceManager != null)
+            resourceManager.OnResourcesChanged -= HandleResourcesChanged;
+    }
+
+    private void HandleResourcesChanged()
+    {
+        OnResourcesChanged?.Invoke();
+        OnGeneratorStatusChanged?.Invoke();
+    }
+
+    // Включить / выключить генератор.
     public void ToggleGenerator()
     {
-        if (generatorPermanentlyBroken)
+        if (resourceManager == null)
+            return;
+
+        if (resourceManager.GeneratorBroken)
         {
-            Debug.Log("Р“РµРЅРµСЂР°С‚РѕСЂ РѕРєРѕРЅС‡Р°С‚РµР»СЊРЅРѕ СЃР»РѕРјР°РЅ. РќРµ РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµС‚СЃСЏ.");
+            Debug.Log("Генератор сломан. Его нельзя включить, пока его не починят.", this);
+            OnGeneratorStatusChanged?.Invoke();
             return;
         }
 
-        if (IsGeneratorWorking)
+        bool newState = !resourceManager.GeneratorIsOn;
+
+        if (newState && !resourceManager.CanTurnOnGenerator)
         {
+            Debug.Log("Недостаточно топлива для включения генератора.", this);
+            OnGeneratorStatusChanged?.Invoke();
+            return;
+        }
+
+        resourceManager.SetGeneratorOn(newState);
+        Debug.Log(newState ? "Генератор включён." : "Генератор выключен.", this);
+    }
+
+    // Список персонажей, доступных для починки генератора.
+    public List<GeneratedCharacter> GetAvailableRepairCharacters()
+    {
+        var result = new List<GeneratedCharacter>();
+
+        if (characterManager == null || characterManager.characters == null)
+            return result;
+
+        foreach (GeneratedCharacter character in characterManager.characters)
+        {
+            if (character == null)
+                continue;
+            if (character.isDead || character.isExiled)
+                continue;
+            if (expeditionManager != null && expeditionManager.IsCharacterOnExpedition(character))
+                continue;
+            if (HasTraitEffect(character, Trait.EffectType.CannotRepairElectricity))
+                continue;
+
+            result.Add(character);
+        }
+
+        return result;
+    }
+
+    // Отправить персонажа на починку. Ремонт разрешится следующей ночью.
+    public bool SendCharacterForRepair(GeneratedCharacter character, out string message)
+    {
+        message = "";
+
+        if (character == null)
+        {
+            message = "Не выбран персонаж.";
+            return false;
+        }
+
+        if (!resourceManager.GeneratorBroken)
+        {
+            message = "Генератор не сломан, починка не требуется.";
+            return false;
+        }
+
+        if (HasPendingRepair)
+        {
+            message = "Ремонт уже запланирован на ближайшую ночь.";
+            return false;
+        }
+
+        var available = GetAvailableRepairCharacters();
+        if (!available.Contains(character))
+        {
+            message = "Этот персонаж не может починить генератор.";
+            return false;
+        }
+
+        pendingRepairCharacter = character;
+        pendingRepairDaySent = DayCycleManager.Instance != null
+            ? DayCycleManager.Instance.CurrentDay
+            : 1;
+
+        message = $"{character.fullName} отправлен(а) чинить генератор. Результат будет утром.";
+        Debug.Log(message, this);
+        OnGeneratorStatusChanged?.Invoke();
+        return true;
+    }
+
+    // Вызывается DayCycleManager во время StartNextDay (ночной расчёт).
+    // Обрабатывает случайную поломку и разрешение отложенного ремонта.
+    public void ProcessGeneratorNight(NightReportData report)
+    {
+        if (resourceManager == null || report == null)
+            return;
+
+        // 1. Случайная поломка генератора ночью (если он работал).
+        if (!resourceManager.GeneratorBroken &&
+            resourceManager.GeneratorIsOn &&
+            report.generatorWorked)
+        {
+            float breakdownChance = CalculateBreakdownChance();
+            if (UnityEngine.Random.Range(0, 100) < breakdownChance)
+            {
+                resourceManager.BreakGenerator();
+                report.specialEvents.Add(
+                    $"Ночью генератор сломался (шанс {breakdownChance:F0}%).");
+                Debug.Log("Генератор сломался ночью.", this);
+                OnGeneratorStatusChanged?.Invoke();
+            }
+        }
+
+        // 2. Разрешение починки, отправленной предыдущим днём.
+        if (HasPendingRepair)
+        {
+            ResolvePendingRepair(report);
+        }
+    }
+
+    private void ResolvePendingRepair(NightReportData report)
+    {
+        if (pendingRepairCharacter == null)
+            return;
+
+        GeneratedCharacter character = pendingRepairCharacter;
+        float successChance = baseRepairSuccessChancePercent;
+
+        bool success = UnityEngine.Random.Range(0, 100) < successChance;
+
+        if (success)
+        {
+            resourceManager.RepairGenerator();
+            string msg = $"{character.fullName} починил генератор. Генератор снова работает.";
+            report.specialEvents.Add(msg);
+            Debug.Log(msg, this);
         }
         else
         {
-            if (resourceManager.FuelCans >= fuelCostPerNight)
+            // Починка не удалась. Проверяем получение урона персонажем.
+            bool canBeInjured = !HasTraitEffect(character, Trait.EffectType.NoInjuryOnGeneratorRepair);
+
+            int injuryChance = baseRepairInjuryChancePercent;
+            foreach (var trait in character.traits)
             {
-                AttemptRepairGenerator();
+                if (trait == null) continue;
+                foreach (var effect in trait.effects)
+                {
+                    if (effect.effectType == Trait.EffectType.ElectricityRepairInjuryChanceChangePoints)
+                        injuryChance += (int)effect.value;
+                    if (effect.effectType == Trait.EffectType.ElectricityRepairInjuryChanceReductionPercent)
+                        injuryChance = Mathf.RoundToInt(injuryChance * (1f - effect.value / 100f));
+                }
+            }
+            injuryChance = Mathf.Clamp(injuryChance, 0, 100);
+
+            bool injured = canBeInjured && UnityEngine.Random.Range(0, 100) < injuryChance;
+
+            if (injured)
+            {
+                int damage = Mathf.Clamp(repairFailureDamageHP, 0, 100);
+                character.health = Mathf.Max(0, character.health - damage);
+                string msg = $"{character.fullName} не смог(ла) починить генератор и получил(а) урон {damage} HP.";
+                report.specialEvents.Add(msg);
+                Debug.Log(msg, this);
+
+                if (character.health <= 0)
+                {
+                    character.isDead = true;
+                    if (report.deaths != null && !report.deaths.Contains(character.fullName))
+                        report.deaths.Add(character.fullName);
+                }
             }
             else
             {
-                Debug.Log("РќРµ С…РІР°С‚Р°РµС‚ С‚РѕРїР»РёРІР° РґР»СЏ РІРєР»СЋС‡РµРЅРёСЏ РіРµРЅРµСЂР°С‚РѕСЂР°.");
+                string msg = $"{character.fullName} не смог(ла) починить генератор. Ремонт не удался.";
+                report.specialEvents.Add(msg);
+                Debug.Log(msg, this);
             }
         }
-        OnResourcesChanged?.Invoke();
+
+        // Очищаем отложенный ремонт (независимо от результата — нужно отправлять заново).
+        pendingRepairCharacter = null;
+        pendingRepairDaySent = -1;
+        OnGeneratorStatusChanged?.Invoke();
     }
 
-    public void AttemptRepairGenerator()
+    private float CalculateBreakdownChance()
     {
-        if (generatorPermanentlyBroken)
+        float chance = baseBreakdownChancePercent;
+
+        if (characterManager != null && characterManager.characters != null)
         {
-            Debug.Log("Р“РµРЅРµСЂР°С‚РѕСЂ СѓР¶Рµ РѕРєРѕРЅС‡Р°С‚РµР»СЊРЅРѕ СЃР»РѕРјР°РЅ.");
-            return;
+            foreach (GeneratedCharacter character in characterManager.characters)
+            {
+                if (character == null || character.isDead || character.isExiled)
+                    continue;
+                if (expeditionManager != null && expeditionManager.IsCharacterOnExpedition(character))
+                    continue;
+
+                foreach (var trait in character.traits)
+                {
+                    if (trait == null) continue;
+                    foreach (var effect in trait.effects)
+                    {
+                        if (effect.effectType == Trait.EffectType.ElectricityBreakChanceChangePoints)
+                            chance += effect.value;
+                    }
+                }
+            }
         }
 
-        repairAttemptsThisSession++;
-
-        Debug.Log($"РџРѕРїС‹С‚РєР° СЂРµРјРѕРЅС‚Р° РіРµРЅРµСЂР°С‚РѕСЂР° #{repairAttemptsThisSession}");
-
-        if (repairAttemptsThisSession >= 2)
-        {
-            FixGenerator();
-            repairAttemptsThisSession = 0;
-            Debug.Log("Р“РµРЅРµСЂР°С‚РѕСЂ СѓСЃРїРµС€РЅРѕ РїРѕС‡РёРЅРµРЅ!");
-            return;
-        }
-
-        float roll = UnityEngine.Random.value;
-
-        if (roll < 0.5f)
-        {
-            FixGenerator();
-            repairAttemptsThisSession = 0;
-            Debug.Log("Р“РµРЅРµСЂР°С‚РѕСЂ СѓСЃРїРµС€РЅРѕ РїРѕС‡РёРЅРµРЅ!");
-        }
-        else if (roll < 0.7f)
-        {
-            resourceManager.BreakGenerator();
-            Debug.Log("РџРµСЂСЃРѕРЅР°Р¶ РїРѕР»СѓС‡РёР» СѓРґР°СЂ С‚РѕРєРѕРј! -30 HP.");
-            repairAttemptsThisSession++;
-            Debug.Log("Р РµР·СѓР»СЊС‚Р°С‚: РЈРґР°СЂ С‚РѕРєРѕРј. РџРѕРїС‹С‚РѕРє СЂРµРјРѕРЅС‚Р°: " + repairAttemptsThisSession);
-        }
-        else
-        {
-            Debug.Log("Р РµР·СѓР»СЊС‚Р°С‚: РќРµС‡РёРЅРёР» РіРµРЅРµСЂР°С‚РѕСЂ. РџРѕРїС‹С‚РѕРє СЂРµРјРѕРЅС‚Р°: " + repairAttemptsThisSession);
-            repairAttemptsThisSession++;
-        }
-
-        if (repairAttemptsThisSession >= repairAttemptLimit)
-        {
-            PermanentlyBreakGenerator();
-        }
-
-        OnResourcesChanged?.Invoke();
+        return Mathf.Clamp(chance, 0, 100);
     }
 
-    private void FixGenerator()
+    private bool HasTraitEffect(GeneratedCharacter character, Trait.EffectType effectType)
     {
-        resourceManager.RepairGenerator();
-        generatorPermanentlyBroken = false;
-        repairAttemptsThisSession = 0;
-        Debug.Log("Р“РµРЅРµСЂР°С‚РѕСЂ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅ.");
-    }
+        if (character == null || character.traits == null)
+            return false;
 
-    private void PermanentlyBreakGenerator()
-    {
-        resourceManager.BreakGenerator();
-        generatorPermanentlyBroken = true;
-        repairAttemptsThisSession = 0;
-        Debug.Log("Р“РµРЅРµСЂР°С‚РѕСЂ РѕРєРѕРЅС‡Р°С‚РµР»СЊРЅРѕ СЃР»РѕРјР°РЅ. РўСЂРµР±СѓРµС‚СЃСЏ Р·Р°РјРµРЅР° РёР»Рё РІС‹Р»Р°Р·РєР° Р·Р° Р·Р°РїС‡Р°СЃС‚СЏРјРё.");
+        foreach (var trait in character.traits)
+        {
+            if (trait == null) continue;
+            foreach (var effect in trait.effects)
+            {
+                if (effect.effectType == effectType)
+                    return true;
+            }
+        }
+
+        return false;
     }
 }

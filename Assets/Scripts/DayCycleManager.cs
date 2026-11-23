@@ -10,6 +10,7 @@ public class DayCycleManager : MonoBehaviour
 
     [SerializeField] private ExpeditionManager expeditionManager;
     [SerializeField] private CharacterManager characterManager;
+    [SerializeField] private ElectricalPanelController electricalPanelController;
 
     public int CurrentDay { get; private set; } = 1;
 
@@ -36,6 +37,9 @@ public class DayCycleManager : MonoBehaviour
 
         if (characterManager == null)
             characterManager = FindObjectOfType<CharacterManager>();
+
+        if (electricalPanelController == null)
+            electricalPanelController = FindObjectOfType<ElectricalPanelController>();
 
         ResourceManager resources = ResourceManager.Instance;
 
@@ -67,9 +71,15 @@ public class DayCycleManager : MonoBehaviour
         // Состояние до обработки ночи.
         int temperatureBefore = resources.TemperatureLevel;
         bool generatorWasBroken = resources.GeneratorBroken;
+        bool generatorWasOn = resources.GeneratorIsOn;
 
-        // Тратим топливо на обогрев.
-        bool fuelConsumed = resources.ConsumeFuel(1);
+        // Тратим топливо на обогрев только если генератор включён и не сломан.
+        bool fuelConsumed = false;
+
+        if (generatorWasOn && !resources.GeneratorBroken)
+        {
+            fuelConsumed = resources.ConsumeFuel(1);
+        }
 
         if (!fuelConsumed)
             resources.SetTemperature(resources.TemperatureLevel - 1);
@@ -80,7 +90,7 @@ public class DayCycleManager : MonoBehaviour
             completedDay = CurrentDay,
             newDay = CurrentDay + 1,
             fuelConsumed = fuelConsumed,
-            generatorWorked = !generatorWasBroken && fuelConsumed,
+            generatorWorked = generatorWasOn && !resources.GeneratorBroken && fuelConsumed,
             temperatureBefore = temperatureBefore,
             temperatureAfter = resources.TemperatureLevel
         };
@@ -111,6 +121,10 @@ public class DayCycleManager : MonoBehaviour
         // экспедиций попадут в этот же отчёт.
         if (expeditionManager != null)
             expeditionManager.ProcessCompletedDay(report);
+
+        // Обрабатываем генератор ночью: случайная поломка и разрешение ремонта.
+        if (electricalPanelController != null)
+            electricalPanelController.ProcessGeneratorNight(report);
 
         // Применяем последствия смертей и проверяем уход жителей.
         // Персонажи, которые всё ещё находятся на вылазке, пропускаются.

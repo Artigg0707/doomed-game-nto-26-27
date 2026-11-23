@@ -9,4 +9,5 @@ public class ResourceData
     public int currentDay;
     public int temperatureLevel; // 3 = тепло, 2 = прохладно, 1 = холодно, 0 = обледенение
     public bool generatorBroken;
+    public bool generatorIsOn = false;
 }
