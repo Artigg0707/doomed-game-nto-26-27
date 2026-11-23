@@ -180,8 +180,8 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3482681453705384466}
   - {fileID: 3262048545779202803}
+  - {fileID: 3482681453705384466}
   - {fileID: 264608203864301702}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -250,8 +250,8 @@ MonoBehaviour:
   backgroundImage: {fileID: 179389601820154746}
   portraitImage: {fileID: 6918401118527272185}
   nameText: {fileID: 4262012566849784427}
-  normalColor: {r: 1, g: 1, b: 1, a: 1}
-  selectedColor: {r: 1, g: 0.8, b: 0.25, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 0}
+  selectedColor: {r: 1, g: 0.8, b: 0.25, a: 0.16862746}
 --- !u!1 &8377562726753799457
 GameObject:
   m_ObjectHideFlags: 0
