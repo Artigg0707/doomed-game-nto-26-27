@@ -4,13 +4,6 @@ using System.Collections.Generic;
 [CreateAssetMenu(fileName = "DoorNote", menuName = "Door Note")]
 public class DoorNoteData : ScriptableObject
 {
-    public enum NoteType
-    {
-        External,
-        Morning,
-        Quiet
-    }
-
     [System.Serializable]
     public class Option
     {
@@ -29,7 +22,6 @@ public class DoorNoteData : ScriptableObject
         Random      
     }
 
-    public NoteType noteType;
     public SpawnType spawnType = SpawnType.Scheduled;
     public string title;
     [TextArea]

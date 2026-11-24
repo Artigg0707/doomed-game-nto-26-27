@@ -34,7 +34,6 @@ public class DoorNoteDataEditor : Editor
 
         EditorGUILayout.Space();
 
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("noteType"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("title"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("text"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("morningReportLine"));

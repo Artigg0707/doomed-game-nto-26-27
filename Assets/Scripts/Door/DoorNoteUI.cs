@@ -28,7 +28,7 @@ public class DoorNoteUI : MonoBehaviour
 
         ClearButtons();
 
-        if (note.noteType == DoorNoteData.NoteType.External && note.options.Count > 0)
+        if (note.options.Count > 0)
         {
             foreach (var option in note.options)
             {

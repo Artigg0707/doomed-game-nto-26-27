@@ -5,6 +5,8 @@ public class InteractDoor : MonoBehaviour, IInteractable, IHighlightable
     public GameObject noteObject;
     public DoorNoteUI noteUI;
 
+    [SerializeField] private Material outlineMaterial;
+
     private Material _outlineMaterial;
     private bool _isInteracting;
     public float highlightValue = 0.01f;
@@ -13,13 +15,25 @@ public class InteractDoor : MonoBehaviour, IInteractable, IHighlightable
 
     void Start()
     {
-        var renderer = GetComponentInChildren<Renderer>(true);
-        if (renderer != null)
+        // 1. Сначала пробуем материал из сериализованного поля (назначить в инспекторе: Out Line Mat.mat)
+        if (outlineMaterial != null)
         {
-            var mats = renderer.materials;
-            if (mats.Length > 1) _outlineMaterial = mats[1];
-            else if (mats.Length == 1) _outlineMaterial = mats[0];
+            _outlineMaterial = outlineMaterial;
         }
+        else
+        {
+            // 2. Иначе ищем у рендерера двери
+            var renderer = GetComponentInChildren<Renderer>(true);
+            if (renderer != null)
+            {
+                var mats = renderer.materials;
+                if (mats.Length > 1) _outlineMaterial = mats[1];
+                else if (mats.Length == 1) _outlineMaterial = mats[0];
+            }
+        }
+
+        if (_outlineMaterial == null)
+            Debug.LogWarning($"[InteractDoor] Материал обводки не найден на объекте {gameObject.name}. Назначьте Out Line Mat.mat в поле Outline Material.", this);
 
         if (DayCycleManager.Instance != null)
             DayCycleManager.Instance.OnDayChanged += OnNewDay;

@@ -25,8 +25,6 @@ public class EventManager : MonoBehaviour
     {
         DayCycleManager.Instance.OnDayChanged += OnNewDay;
 
-        
-        
         if (notes.Count == 0)
         {
             var loaded = Resources.LoadAll<DoorNoteData>("");
@@ -35,6 +33,12 @@ public class EventManager : MonoBehaviour
                 notes.AddRange(loaded);
                 Debug.Log($"[EventManager] Auto-loaded notes from Resources: {loaded.Length}");
             }
+        }
+
+        // Check notes that should be active on the current starting day (not only on day change)
+        if (DayCycleManager.Instance != null)
+        {
+            OnNewDay(DayCycleManager.Instance.CurrentDay);
         }
     }
 
@@ -49,26 +53,31 @@ public class EventManager : MonoBehaviour
         _noteResolvedToday = false;
         _activeNote = null;
 
+        bool scheduledFound = false;
         foreach (var note in notes)
         {
             if (note != null && note.spawnType == DoorNoteData.SpawnType.Scheduled && note.triggerDay == day)
             {
                 _activeNote = note;
-                Debug.Log($"[EventManager] Активна записка на день {day}: {note.title}");
-                return;
+                scheduledFound = true;
+                Debug.Log($"[EventManager] Scheduled note activated for day {day}: {note.title}");
+                break;
             }
         }
 
-        
-        foreach (var note in notes)
+        // Random notes are checked ONLY if no scheduled note was found for today
+        if (!scheduledFound)
         {
-            if (note != null && note.spawnType == DoorNoteData.SpawnType.Random && note.randomChance > 0)
+            foreach (var note in notes)
             {
-                if (UnityEngine.Random.Range(0, 100) < note.randomChance)
+                if (note != null && note.spawnType == DoorNoteData.SpawnType.Random && note.randomChance > 0)
                 {
-                    _activeNote = note;
-                    Debug.Log($"[EventManager] Random note triggered on day {day}: {note.title}");
-                    return;
+                    if (UnityEngine.Random.Range(0, 100) < note.randomChance)
+                    {
+                        _activeNote = note;
+                        Debug.Log($"[EventManager] Random note triggered on day {day}: {note.title}");
+                        break;
+                    }
                 }
             }
         }
@@ -88,19 +97,20 @@ public class EventManager : MonoBehaviour
     {
         _noteResolvedToday = true;
         _activeNote = null;
-        Debug.Log("[EventManager] Записка разрешена");
+        Debug.Log("[EventManager] Note resolved");
     }
 
-    public string GetQuietLineForDay(int day)
+    public List<string> GetMorningLinesForDay(int day)
     {
+        var lines = new List<string>();
         foreach (var note in notes)
         {
-            if (note != null && note.triggerDay == day && note.noteType == DoorNoteData.NoteType.Quiet)
+            if (note != null && note.triggerDay == day && !string.IsNullOrEmpty(note.morningReportLine))
             {
-                return note.morningReportLine;
+                lines.Add(note.morningReportLine);
             }
         }
-        return null;
+        return lines;
     }
 
     public void ApplyOption(DoorNoteData.Option option)

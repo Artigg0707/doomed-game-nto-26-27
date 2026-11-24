@@ -136,9 +136,12 @@ public class DayCycleManager : MonoBehaviour
 
         if (EventManager.Instance != null)
         {
-            var quietLine = EventManager.Instance.GetQuietLineForDay(CurrentDay);
-            if (!string.IsNullOrEmpty(quietLine) && report != null)
-                report.specialEvents.Add(quietLine);
+            var morningLines = EventManager.Instance.GetMorningLinesForDay(CurrentDay);
+            if (morningLines != null && report != null)
+            {
+                foreach (var line in morningLines)
+                    report.specialEvents.Add(line);
+            }
         }
 
         if (IsDefeat())
