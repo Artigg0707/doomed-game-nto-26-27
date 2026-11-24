@@ -22,8 +22,8 @@ MonoBehaviour:
   deathChancePercent: 5
   minInjuryDamage: 10
   maxInjuryDamage: 25
-  minCooldownDays: 2
-  maxCooldownDays: 4
+  minCooldownDays: 3
+  maxCooldownDays: 5
   possibleRewards:
   - resourceType: 0
     minAmount: 3

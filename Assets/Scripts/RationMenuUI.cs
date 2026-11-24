@@ -112,19 +112,19 @@ public class RationMenuUI : MonoBehaviour, IOpenablePanel
         if (resources == null)
         {
             if (foodCountText != null)
-                foodCountText.text = "Еда: доступно —";
+                foodCountText.text = "Еда: —";
 
             if (waterCountText != null)
-                waterCountText.text = "Вода: доступно —";
+                waterCountText.text = "Вода: —";
 
             return;
         }
 
         if (foodCountText != null)
-            foodCountText.text = $"Еда: доступно {resources.FoodCans}";
+            foodCountText.text = $"Еда: {resources.FoodCans}";
 
         if (waterCountText != null)
-            waterCountText.text = $"Вода: доступно {resources.WaterBottles}";
+            waterCountText.text = $"Вода: {resources.WaterBottles}";
     }
 
     private void RebuildCards()

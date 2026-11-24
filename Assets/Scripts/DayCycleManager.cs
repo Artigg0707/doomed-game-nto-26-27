@@ -134,6 +134,13 @@ public class DayCycleManager : MonoBehaviour
         OnDayChanged?.Invoke(CurrentDay);
         OnNightComplete?.Invoke(report);
 
+        if (EventManager.Instance != null)
+        {
+            var quietLine = EventManager.Instance.GetQuietLineForDay(CurrentDay);
+            if (!string.IsNullOrEmpty(quietLine) && report != null)
+                report.specialEvents.Add(quietLine);
+        }
+
         if (IsDefeat())
         {
             OnDefeat?.Invoke();

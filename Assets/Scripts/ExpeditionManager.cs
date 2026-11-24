@@ -24,8 +24,6 @@ public class ExpeditionManager : MonoBehaviour
     [SerializeField] private CharacterManager characterManager;
 
     [Header("Limits")]
-    [SerializeField, Min(1)] private int maxActiveExpeditions = 2;
-
     [Header("Expedition population dependence")]
     [Tooltip("Base population at which expedition is considered safe (no extra chances).")]
     [SerializeField, Min(1)] private int referencePopulation = 5;
@@ -47,7 +45,19 @@ public class ExpeditionManager : MonoBehaviour
         activeExpeditions != null ? activeExpeditions.Count : 0;
 
     public int MaxConcurrentExpeditions =>
-        Mathf.Max(1, maxActiveExpeditions);
+        Mathf.Max(1, Mathf.RoundToInt(AliveCharactersCount() / 2f));
+
+    private int AliveCharactersCount()
+    {
+        if (characterManager == null || characterManager.characters == null) return 1;
+        int count = 0;
+        foreach (var character in characterManager.characters)
+        {
+            if (character != null && !character.isDead && !character.isExiled && !IsCharacterOnExpedition(character))
+                count++;
+        }
+        return Mathf.Max(1, count);
+    }
 
     private int lastProcessedDay = -1;
 

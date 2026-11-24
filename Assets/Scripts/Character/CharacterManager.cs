@@ -3,10 +3,17 @@ using UnityEngine;
 
 public class CharacterManager : MonoBehaviour
 {
+    public static CharacterManager Instance { get; private set; }
+
     public CharacterGenerator genCgaracter;
     public List<GeneratedCharacter> characters = new List<GeneratedCharacter>();
 
     public event System.Action OnRationsChanged;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     [Header("Карточки персонажей")]
     [SerializeField] private CharacterCardUI cardPrefab;
