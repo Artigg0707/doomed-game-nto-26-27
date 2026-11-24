@@ -35,8 +35,7 @@ public class ElectricalPanelController : MonoBehaviour
 
     public event Action OnResourcesChanged;
     public event Action OnGeneratorStatusChanged;
-
-    // Починка на следующий день (runtime-состояние, сбрасывается при разрешении)
+    
     private GeneratedCharacter pendingRepairCharacter;
     private int pendingRepairDaySent = -1;
 
@@ -72,8 +71,7 @@ public class ElectricalPanelController : MonoBehaviour
         OnResourcesChanged?.Invoke();
         OnGeneratorStatusChanged?.Invoke();
     }
-
-    // Включить / выключить генератор.
+    
     public void ToggleGenerator()
     {
         if (resourceManager == null)
@@ -98,8 +96,7 @@ public class ElectricalPanelController : MonoBehaviour
         resourceManager.SetGeneratorOn(newState);
         Debug.Log(newState ? "Генератор включён." : "Генератор выключен.", this);
     }
-
-    // Список персонажей, доступных для починки генератора.
+    
     public List<GeneratedCharacter> GetAvailableRepairCharacters()
     {
         var result = new List<GeneratedCharacter>();
@@ -123,8 +120,7 @@ public class ElectricalPanelController : MonoBehaviour
 
         return result;
     }
-
-    // Отправить персонажа на починку. Ремонт разрешится следующей ночью.
+    
     public bool SendCharacterForRepair(GeneratedCharacter character, out string message)
     {
         message = "";
@@ -164,15 +160,12 @@ public class ElectricalPanelController : MonoBehaviour
         OnGeneratorStatusChanged?.Invoke();
         return true;
     }
-
-    // Вызывается DayCycleManager во время StartNextDay (ночной расчёт).
-    // Обрабатывает случайную поломку и разрешение отложенного ремонта.
+    
     public void ProcessGeneratorNight(NightReportData report)
     {
         if (resourceManager == null || report == null)
             return;
-
-        // 1. Случайная поломка генератора ночью (если он работал).
+        
         if (!resourceManager.GeneratorBroken &&
             resourceManager.GeneratorIsOn &&
             report.generatorWorked)
@@ -187,8 +180,7 @@ public class ElectricalPanelController : MonoBehaviour
                 OnGeneratorStatusChanged?.Invoke();
             }
         }
-
-        // 2. Разрешение починки, отправленной предыдущим днём.
+        
         if (HasPendingRepair)
         {
             ResolvePendingRepair(report);
@@ -214,7 +206,6 @@ public class ElectricalPanelController : MonoBehaviour
         }
         else
         {
-            // Починка не удалась. Проверяем получение урона персонажем.
             bool canBeInjured = !HasTraitEffect(character, Trait.EffectType.NoInjuryOnGeneratorRepair);
 
             int injuryChance = baseRepairInjuryChancePercent;
@@ -255,8 +246,7 @@ public class ElectricalPanelController : MonoBehaviour
                 Debug.Log(msg, this);
             }
         }
-
-        // Очищаем отложенный ремонт (независимо от результата — нужно отправлять заново).
+        
         pendingRepairCharacter = null;
         pendingRepairDaySent = -1;
         OnGeneratorStatusChanged?.Invoke();

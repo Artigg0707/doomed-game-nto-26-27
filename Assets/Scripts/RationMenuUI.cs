@@ -42,7 +42,6 @@ public class RationMenuUI : MonoBehaviour, IOpenablePanel
 
     public void ClosePanel()
     {
-        // Назначения сохраняются. Здесь ничего не сбрасываем.
         gameObject.SetActive(false);
     }
 
@@ -147,8 +146,7 @@ public class RationMenuUI : MonoBehaviour, IOpenablePanel
             Debug.LogError("В RationMenuUI не назначен Content для карточек.", this);
             return;
         }
-
-        // Удаляем только карточки пайков, оставляя прочие объекты Content.
+        
         for (int i = cardsContainer.childCount - 1; i >= 0; i--)
         {
             Transform child = cardsContainer.GetChild(i);

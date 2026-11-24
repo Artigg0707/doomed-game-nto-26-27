@@ -25,7 +25,6 @@ public class CharacterCardDrag : MonoBehaviour,
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        // Сбрасываем признак перетаскивания перед нажатием на карточку.
         WasDragged = false;
     }
 

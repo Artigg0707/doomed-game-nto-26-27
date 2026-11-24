@@ -47,6 +47,31 @@ public class BedSleepTrigger : MonoBehaviour
             else
                 Debug.LogWarning("[BedSleepTrigger] FadePanel не найден! Назначьте в инспекторе.");
         }
+
+        if (defeatScreenPanel == null)
+        {
+            var panels = FindObjectsOfType<DefeatScreenPanel>(true);
+            if (panels.Length > 0)
+                defeatScreenPanel = panels[0];
+        }
+    }
+
+    private DefeatScreenPanel ResolveDefeatPanel()
+    {
+        if (defeatScreenPanel != null)
+            return defeatScreenPanel;
+
+        if (DefeatScreenPanel.Instance != null)
+            return DefeatScreenPanel.Instance;
+        
+        var panels = FindObjectsOfType<DefeatScreenPanel>(true);
+        if (panels.Length > 0)
+        {
+            defeatScreenPanel = panels[0];
+            return defeatScreenPanel;
+        }
+
+        return null;
     }
 
     private void OnEnable()
@@ -94,8 +119,7 @@ public class BedSleepTrigger : MonoBehaviour
     private IEnumerator SleepSequence()
     {
         _isSleeping = true;
-
-        // Блокируем управление игроком
+        
         var playerMove = FindObjectOfType<PlayerMove>();
         if (playerMove != null)
         {
@@ -109,8 +133,7 @@ public class BedSleepTrigger : MonoBehaviour
             interactor.enabled = false;
             Debug.Log("[BedSleepTrigger] Interactor отключён.");
         }
-
-        // Fade to black (если есть панель затемнения)
+        
         if (fadePanel != null)
         {
             Debug.Log("[BedSleepTrigger] Fade to black...");
@@ -131,8 +154,7 @@ public class BedSleepTrigger : MonoBehaviour
         {
             Debug.LogWarning("[BedSleepTrigger] FadePanel не назначен! Переход будет мгновенным.");
         }
-
-        // Запускаем ночной расчёт
+        
         Debug.Log("[BedSleepTrigger] Вызов DayCycleManager.StartNextDay()...");
         DayCycleManager.Instance.StartNextDay();
 
@@ -142,9 +164,7 @@ public class BedSleepTrigger : MonoBehaviour
             (DayCycleManager.Instance != null &&
              DayCycleManager.Instance.IsDefeat()))
         {
-            DefeatScreenPanel panel = defeatScreenPanel != null
-                ? defeatScreenPanel
-                : DefeatScreenPanel.Instance;
+            DefeatScreenPanel panel = ResolveDefeatPanel();
 
             if (panel != null)
             {
@@ -166,6 +186,13 @@ public class BedSleepTrigger : MonoBehaviour
 
                 string defeatReason = DayCycleManager.Instance.GetDefeatReason();
                 panel.ShowDefeatWithStory(daysSurvived, survivorsCount, deathsCount, exiledCount, defeatReason);
+                
+                if (fadePanel != null)
+                {
+                    StartCoroutine(FadeOutRoutine());
+                    fadePanel.blocksRaycasts = false;
+                    fadePanel.interactable = false;
+                }
             }
             else
                 Debug.LogError("DefeatScreenPanel не найден.", this);
@@ -177,9 +204,7 @@ public class BedSleepTrigger : MonoBehaviour
             (DayCycleManager.Instance != null &&
              DayCycleManager.Instance.IsVictory()))
         {
-            DefeatScreenPanel panel = defeatScreenPanel != null
-                ? defeatScreenPanel
-                : DefeatScreenPanel.Instance;
+            DefeatScreenPanel panel = ResolveDefeatPanel();
 
             if (panel != null)
             {
@@ -200,23 +225,28 @@ public class BedSleepTrigger : MonoBehaviour
                 }
 
                 panel.ShowVictoryWithStory(daysSurvived, survivorsCount, deathsCount, exiledCount);
+                
+                if (fadePanel != null)
+                {
+                    StartCoroutine(FadeOutRoutine());
+                    fadePanel.blocksRaycasts = false;
+                    fadePanel.interactable = false;
+                }
             }
             else
                 Debug.LogError("DefeatScreenPanel не найден.", this);
 
             yield break;
         }
-
-        // Показываем панель утренней сводки (всегда, даже если отчёт пустой)
+        
         if (morningReportPanel != null)
         {
-            // Если отчёт не пришёл через событие, собираем данные напрямую
             if (_pendingReport == null)
             {
                 Debug.LogWarning("[BedSleepTrigger] Отчёт ночи не получен через событие, собираем данные напрямую.");
 
                 ResourceManager resources = ResourceManager.Instance;
-                bool fuelConsumed = false; // мы не знаем, было ли израсходовано, если событие не пришло
+                bool fuelConsumed = false; 
                 int tempBefore = resources != null ? resources.TemperatureLevel : 3;
                 int tempAfter = resources != null ? resources.TemperatureLevel : 3;
 
@@ -229,8 +259,7 @@ public class BedSleepTrigger : MonoBehaviour
                     temperatureBefore = tempBefore,
                     temperatureAfter = tempAfter
                 };
-
-                // Добавляем статус каждого жителя из CharacterManager
+                
                 if (characterManager != null)
                 {
                     foreach (GeneratedCharacter c in characterManager.characters)
@@ -386,11 +415,7 @@ public class BedSleepTrigger : MonoBehaviour
         _isSleeping = false;
         _pendingReport = null;
     }
-
-    /// <summary>
-    /// ��������� �����, ���� �������� �� ������ ������. 
-    /// ����� ������� ����� ������� Unity: BedSleepTrigger.ForceReset()
-    /// </summary>
+    
     [ContextMenu("Force Reset Sleep (экстренный выход из чёрного экрана)")]
     public static void ForceReset()
     {
@@ -400,8 +425,7 @@ public class BedSleepTrigger : MonoBehaviour
             trigger.FinishSleep();
             Debug.Log("[BedSleepTrigger] Экстренный сброс выполнен.");
         }
-
-        // Также сбрасываем все CanvasGroup на сцене на всякий случай
+        
         var groups = FindObjectsOfType<CanvasGroup>();
         foreach (var g in groups)
         {

@@ -199,9 +199,7 @@ public class ExpeditionManager : MonoBehaviour
             message = "Этот персонаж уже находится в вылазке.";
             return false;
         }
-
-        // Назначенные пайки отменяются через существующий CharacterManager.
-        // Ресурсы возвращаются, а счётчики голода и жажды здесь не меняются.
+        
         if (character.receivesFoodToday)
             characterManager.SetFoodRation(character, false);
 
@@ -231,13 +229,11 @@ public class ExpeditionManager : MonoBehaviour
         OnExpeditionsChanged?.Invoke();
         return true;
     }
-
-    // Вызывать один раз после продвижения игрового дня.
+    
     public void ProcessCompletedDay(NightReportData report)
     {
         int processingDay = CurrentDay;
-
-        // Не даём случайно обработать один и тот же день дважды.
+        
         if (lastProcessedDay == processingDay)
             return;
 
@@ -272,8 +268,7 @@ public class ExpeditionManager : MonoBehaviour
         }
 
         RemoveExpiredCooldowns(processingDay);
-
-        // Это событие также обновляет UI, когда локация снова становится доступна.
+        
         OnExpeditionsChanged?.Invoke();
     }
 
@@ -292,8 +287,7 @@ public class ExpeditionManager : MonoBehaviour
 
         if (location == null)
             return $"{character.fullName} вернулся(лась), но локация не найдена.";
-
-        // Сначала проверяется риск смерти.
+        
         if (RollChance(location.deathChancePercent))
         {
             MarkCharacterDead(character, report);
@@ -302,8 +296,7 @@ public class ExpeditionManager : MonoBehaviour
                 $"{character.fullName} погиб(ла) во время вылазки " +
                 $"в «{location.locationName}». Награды не получены.";
         }
-
-        // Если персонаж пережил проверку смерти, отдельно проверяем ранение.
+        
         string injuryMessage = "";
 
         if (RollChance(location.injuryChancePercent))
@@ -390,9 +383,7 @@ public class ExpeditionManager : MonoBehaviour
 
             int minAmount = Mathf.Max(0, reward.minAmount);
             int maxAmount = Mathf.Max(minAmount, reward.maxAmount);
-
-            // Для int верхняя граница Random.Range не включается,
-            // поэтому добавляем 1.
+            
             int amount = UnityEngine.Random.Range(minAmount, maxAmount + 1);
 
             if (amount <= 0)
