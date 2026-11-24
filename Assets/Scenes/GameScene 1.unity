@@ -2733,6 +2733,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!1 &209374773 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: fc6d0880eee53ee42b208cf9f6116b67, type: 3}
+  m_PrefabInstance: {fileID: 603200110}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &209374776 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: fc6d0880eee53ee42b208cf9f6116b67, type: 3}
+  m_PrefabInstance: {fileID: 603200110}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &209374777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 209374773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 502b12b1d65e4a34bb7ae32dc989e8ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InteractPC
+  playerCamera: {fileID: 1640825934}
+  objCam: {fileID: 1052355155}
+  panelToOpen: {fileID: 0}
+  highlightValue: 0.01
+  normalValue: 0
+  propertyName: _OutlineSize
+--- !u!65 &209374778
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 209374773}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.020000003, y: 0.0054243864, z: 0.03999999}
+  m_Center: {x: 0.07631482, y: -0.0055642566, z: 0.020516552}
 --- !u!1 &229078881
 GameObject:
   m_ObjectHideFlags: 0
@@ -5769,9 +5818,21 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: fc6d0880eee53ee42b208cf9f6116b67, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: fc6d0880eee53ee42b208cf9f6116b67, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 512b114d887dc9f47a934f39c0df7358, type: 2}
+    - target: {fileID: -7511558181221131132, guid: fc6d0880eee53ee42b208cf9f6116b67, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 5abc067667d35e24ba567ad853e64cd4, type: 2}
+    - target: {fileID: -7511558181221131132, guid: fc6d0880eee53ee42b208cf9f6116b67, type: 3}
+      propertyPath: 'm_Materials.Array.data[2]'
+      value: 
+      objectReference: {fileID: 42066382878777842, guid: fc6d0880eee53ee42b208cf9f6116b67, type: 3}
     - target: {fileID: 919132149155446097, guid: fc6d0880eee53ee42b208cf9f6116b67, type: 3}
       propertyPath: m_Name
       value: Door
@@ -5782,8 +5843,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: fc6d0880eee53ee42b208cf9f6116b67, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1052355156}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: fc6d0880eee53ee42b208cf9f6116b67, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 209374777}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: fc6d0880eee53ee42b208cf9f6116b67, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 209374778}
   m_SourcePrefab: {fileID: 100100000, guid: fc6d0880eee53ee42b208cf9f6116b67, type: 3}
 --- !u!1001 &641397297
 PrefabInstance:
@@ -9531,6 +9601,81 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: b87205bde9db5014d85c0440161ad2b3, type: 3}
   m_PrefabInstance: {fileID: 1014066254}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1052355154
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1052355156}
+  - component: {fileID: 1052355155}
+  m_Layer: 0
+  m_Name: DoorCamm
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1052355155
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1052355154}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCamera
+  Priority:
+    Enabled: 0
+    m_Value: 0
+  OutputChannel: 1
+  StandbyUpdate: 2
+  m_StreamingVersion: 20241001
+  m_LegacyPriority: 0
+  Target:
+    TrackingTarget: {fileID: 0}
+    LookAtTarget: {fileID: 0}
+    CustomLookAtTarget: 0
+  Lens:
+    FieldOfView: 60.000004
+    OrthographicSize: 5
+    NearClipPlane: 0.3
+    FarClipPlane: 1000
+    Dutch: 0
+    ModeOverride: 0
+    PhysicalProperties:
+      GateFit: 2
+      SensorSize: {x: 21.946, y: 16.002}
+      LensShift: {x: 0, y: 0}
+      FocusDistance: 10
+      Iso: 200
+      ShutterSpeed: 0.005
+      Aperture: 16
+      BladeCount: 5
+      Curvature: {x: 2, y: 11}
+      BarrelClipping: 0.25
+      Anamorphism: 0
+  BlendHint: 0
+--- !u!4 &1052355156
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1052355154}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.30292532, y: 0.79712117, z: 0.4879835, w: 0.18629602}
+  m_LocalPosition: {x: 0.0653668, y: -0.017493505, z: 0.008467576}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 209374776}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1077849115
 GameObject:
   m_ObjectHideFlags: 0
