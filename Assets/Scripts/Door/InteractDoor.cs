@@ -21,7 +21,28 @@ public class InteractDoor : MonoBehaviour, IInteractable, IHighlightable
             else if (mats.Length == 1) _outlineMaterial = mats[0];
         }
 
-        if (noteObject != null) noteObject.SetActive(EventManager.Instance.HasActiveNote());
+        if (DayCycleManager.Instance != null)
+            DayCycleManager.Instance.OnDayChanged += OnNewDay;
+
+        UpdateNoteVisibility();
+    }
+
+    void OnDestroy()
+    {
+        if (DayCycleManager.Instance != null)
+            DayCycleManager.Instance.OnDayChanged -= OnNewDay;
+    }
+
+    void OnNewDay(int day)
+    {
+        UpdateNoteVisibility();
+    }
+
+    void UpdateNoteVisibility()
+    {
+        bool hasNote = EventManager.Instance != null && EventManager.Instance.HasActiveNote();
+        if (noteObject != null)
+            noteObject.SetActive(hasNote);
     }
 
     void Update()

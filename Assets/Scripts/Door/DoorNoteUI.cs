@@ -26,16 +26,13 @@ public class DoorNoteUI : MonoBehaviour
         if (titleText != null) titleText.text = note.title;
         if (bodyText != null) bodyText.text = note.text;
 
-        foreach (Transform child in buttonContainer)
-        {
-            if (child.gameObject != buttonPrefab) Destroy(child.gameObject);
-        }
+        ClearButtons();
 
         if (note.noteType == DoorNoteData.NoteType.External && note.options.Count > 0)
         {
             foreach (var option in note.options)
             {
-                var btn = Instantiate(buttonPrefab, buttonContainer);
+                var btn = Instantiate(buttonPrefab, buttonContainer, false);
                 var btnText = btn.GetComponentInChildren<TextMeshProUGUI>();
                 if (btnText != null) btnText.text = option.buttonText;
 
@@ -46,12 +43,20 @@ public class DoorNoteUI : MonoBehaviour
         }
         else
         {
-            var btn = Instantiate(buttonPrefab, buttonContainer);
+            var btn = Instantiate(buttonPrefab, buttonContainer, false);
             var btnText = btn.GetComponentInChildren<TextMeshProUGUI>();
-            if (btnText != null) btnText.text = "Понятно";
+            if (btnText != null) btnText.text = "\u041f\u043e\u043d\u044f\u0442\u043d\u043e";
 
             var button = btn.GetComponent<Button>();
             button.onClick.AddListener(OnCloseClicked);
+        }
+    }
+
+    private void ClearButtons()
+    {
+        for (int i = buttonContainer.childCount - 1; i >= 0; i--)
+        {
+            Destroy(buttonContainer.GetChild(i).gameObject);
         }
     }
 
@@ -60,12 +65,6 @@ public class DoorNoteUI : MonoBehaviour
         if (panel != null) panel.SetActive(false);
 
         EventManager.Instance.ApplyOption(option);
-
-        if (option.movesToNextDay)
-        {
-            return;
-        }
-
         EventManager.Instance.ResolveNote();
 
         var door = FindObjectOfType<InteractDoor>();

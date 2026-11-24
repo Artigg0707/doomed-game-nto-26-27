@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 
 public class BedSleepTrigger : MonoBehaviour
@@ -435,3 +436,4 @@ public class BedSleepTrigger : MonoBehaviour
         }
     }
 }
+

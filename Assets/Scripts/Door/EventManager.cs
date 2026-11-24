@@ -39,10 +39,25 @@ public class EventManager : MonoBehaviour
 
         foreach (var note in notes)
         {
-            if (note.triggerDay == day)
+            if (note != null && note.spawnType == DoorNoteData.SpawnType.Scheduled && note.triggerDay == day)
             {
                 _activeNote = note;
-                break;
+                Debug.Log($"[EventManager] Активна записка на день {day}: {note.title}");
+                return;
+            }
+        }
+
+        // 2. If no scheduled note - check random notes by chance
+        foreach (var note in notes)
+        {
+            if (note != null && note.spawnType == DoorNoteData.SpawnType.Random && note.randomChance > 0)
+            {
+                if (UnityEngine.Random.Range(0, 100) < note.randomChance)
+                {
+                    _activeNote = note;
+                    Debug.Log($"[EventManager] Random note triggered on day {day}: {note.title}");
+                    return;
+                }
             }
         }
     }
@@ -61,13 +76,14 @@ public class EventManager : MonoBehaviour
     {
         _noteResolvedToday = true;
         _activeNote = null;
+        Debug.Log("[EventManager] Записка разрешена");
     }
 
     public string GetQuietLineForDay(int day)
     {
         foreach (var note in notes)
         {
-            if (note.triggerDay == day && note.noteType == DoorNoteData.NoteType.Quiet)
+            if (note != null && note.triggerDay == day && note.noteType == DoorNoteData.NoteType.Quiet)
             {
                 return note.morningReportLine;
             }

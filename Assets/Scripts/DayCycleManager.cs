@@ -407,7 +407,7 @@ public class DayCycleManager : MonoBehaviour
         if (cm.characters == null)
             return;
 
-        // Считаем живых после текущих смертей — чем их меньше, тем жёстче штраф
+        
         int aliveCount = 0;
         foreach (GeneratedCharacter c in cm.characters)
         {
@@ -415,7 +415,7 @@ public class DayCycleManager : MonoBehaviour
                 aliveCount++;
         }
 
-        // Множитель: при 5 живых = 1, при 4 = 2, при 3 = 3, при 2 = 4, при 1 = 5
+        
         int populationMultiplier = Mathf.Max(1, 6 - aliveCount);
 
         foreach (GeneratedCharacter character in cm.characters)

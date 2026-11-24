@@ -178,7 +178,7 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
 
     private void OnSummaryContinued()
     {
-        // Fade in
+        
         if (fadePanel != null)
         {
             StartCoroutine(FadeInRoutine());
