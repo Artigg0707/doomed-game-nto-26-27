@@ -26,6 +26,14 @@ public class ExpeditionManager : MonoBehaviour
     [Header("Limits")]
     [SerializeField, Min(1)] private int maxActiveExpeditions = 2;
 
+    [Header("Expedition population dependence")]
+    [Tooltip("Base population at which expedition is considered safe (no extra chances).")]
+    [SerializeField, Min(1)] private int referencePopulation = 5;
+    [Tooltip("How much death chance on expedition increases per each missing person in bunker (below referencePopulation).")]
+    [SerializeField, Range(0, 100)] private int expeditionDeathChanceIncreasePerMissingPerson = 5;
+    [Tooltip("How much injury chance on expedition increases per each missing person in bunker (below referencePopulation).")]
+    [SerializeField, Range(0, 100)] private int expeditionInjuryChanceIncreasePerMissingPerson = 5;
+
     [Header("Runtime state")]
     [SerializeField] private List<ExpeditionRun> activeExpeditions =
         new List<ExpeditionRun>();
@@ -288,7 +296,16 @@ public class ExpeditionManager : MonoBehaviour
         if (location == null)
             return $"{character.fullName} вернулся(лась), но локация не найдена.";
         
-        if (RollChance(location.deathChancePercent))
+        int aliveInBunker = CountAliveInBunker();
+        int missingPeople = Mathf.Max(0, referencePopulation - aliveInBunker);
+        int adjustedDeathChance = Mathf.Clamp(
+            location.deathChancePercent + missingPeople * expeditionDeathChanceIncreasePerMissingPerson,
+            0, 100);
+        int adjustedInjuryChance = Mathf.Clamp(
+            location.injuryChancePercent + missingPeople * expeditionInjuryChanceIncreasePerMissingPerson,
+            0, 100);
+
+        if (RollChance(adjustedDeathChance))
         {
             MarkCharacterDead(character, report);
 
@@ -299,7 +316,7 @@ public class ExpeditionManager : MonoBehaviour
         
         string injuryMessage = "";
 
-        if (RollChance(location.injuryChancePercent))
+        if (RollChance(adjustedInjuryChance))
         {
             int minDamage = Mathf.Max(0, location.minInjuryDamage);
             int maxDamage = Mathf.Max(minDamage, location.maxInjuryDamage);
@@ -326,6 +343,26 @@ public class ExpeditionManager : MonoBehaviour
         return
             $"{character.fullName} вернулся(лась) из локации " +
             $"«{location.locationName}».{injuryMessage} Награды: {rewards}.";
+    }
+
+    private int CountAliveInBunker()
+    {
+        int count = 0;
+
+        if (characterManager != null && characterManager.characters != null)
+        {
+            foreach (GeneratedCharacter character in characterManager.characters)
+            {
+                if (character == null || character.isDead || character.isExiled)
+                    continue;
+                if (IsCharacterOnExpedition(character))
+                    continue;
+
+                count++;
+            }
+        }
+
+        return count;
     }
 
     private bool RollChance(int chancePercent)

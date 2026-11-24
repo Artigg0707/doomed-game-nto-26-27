@@ -16,6 +16,14 @@ public class ElectricalPanelController : MonoBehaviour
     [SerializeField, Range(0, 100)] private int baseRepairInjuryChancePercent = 25;
     [SerializeField] private int repairFailureDamageHP = 15;
 
+    [Header("«ависимость от численности людей в бункере")]
+    [Tooltip("Ўанс поломки генератора, если в бункере всего 1 живой человек (не на вылазке).")]
+    [SerializeField, Range(0, 100)] private int breakdownChanceForOnePerson = 60;
+    [Tooltip("Ќа сколько уменьшаетс€ шанс поломки за каждого дополнительного живого человека в бункере.")]
+    [SerializeField, Range(0, 100)] private int breakdownReductionPerAdditionalPerson = 10;
+    [Tooltip("Ѕонус к шансу успешного починки генератора за каждого дополнительного живого человека в бункере.")]
+    [SerializeField, Range(0, 100)] private int repairSuccessBonusPerAdditionalPerson = 10;
+
     [Header("—татус")]
     public bool IsGeneratorWorking =>
         resourceManager != null &&
@@ -193,7 +201,8 @@ public class ElectricalPanelController : MonoBehaviour
             return;
 
         GeneratedCharacter character = pendingRepairCharacter;
-        float successChance = baseRepairSuccessChancePercent;
+        int aliveInBunker = CountAliveInBunker();
+        float successChance = baseRepairSuccessChancePercent + (aliveInBunker - 1) * repairSuccessBonusPerAdditionalPerson;
 
         bool success = UnityEngine.Random.Range(0, 100) < successChance;
 
@@ -252,9 +261,35 @@ public class ElectricalPanelController : MonoBehaviour
         OnGeneratorStatusChanged?.Invoke();
     }
 
+    private int CountAliveInBunker()
+    {
+        int count = 0;
+
+        if (characterManager != null && characterManager.characters != null)
+        {
+            foreach (GeneratedCharacter character in characterManager.characters)
+            {
+                if (character == null || character.isDead || character.isExiled)
+                    continue;
+                if (expeditionManager != null && expeditionManager.IsCharacterOnExpedition(character))
+                    continue;
+
+                count++;
+            }
+        }
+
+        return count;
+    }
+
     private float CalculateBreakdownChance()
     {
-        float chance = baseBreakdownChancePercent;
+        int aliveInBunker = CountAliveInBunker();
+
+        float chance;
+        if (aliveInBunker <= 1)
+            chance = breakdownChanceForOnePerson;
+        else
+            chance = Mathf.Max(0, breakdownChanceForOnePerson - (aliveInBunker - 1) * breakdownReductionPerAdditionalPerson);
 
         if (characterManager != null && characterManager.characters != null)
         {

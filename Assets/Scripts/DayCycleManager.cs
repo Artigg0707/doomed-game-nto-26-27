@@ -3,7 +3,9 @@ using UnityEngine;
 
 public class DayCycleManager : MonoBehaviour
 {
-    private const int MoralePenaltyPerDeath = 10;
+    [Header("Мораль и потери")]
+    [SerializeField, Range(0, 50)] private int baseMoralePenaltyPerDeath = 10;
+
     private const int VictoryDay = 10;
 
     public static DayCycleManager Instance { get; private set; }
@@ -398,6 +400,17 @@ public class DayCycleManager : MonoBehaviour
         if (cm.characters == null)
             return;
 
+        // Считаем живых после текущих смертей — чем их меньше, тем жёстче штраф
+        int aliveCount = 0;
+        foreach (GeneratedCharacter c in cm.characters)
+        {
+            if (c != null && !c.isDead && !c.isExiled)
+                aliveCount++;
+        }
+
+        // Множитель: при 5 живых = 1, при 4 = 2, при 3 = 3, при 2 = 4, при 1 = 5
+        int populationMultiplier = Mathf.Max(1, 6 - aliveCount);
+
         foreach (GeneratedCharacter character in cm.characters)
         {
             if (character == null || character.isDead || character.isExiled)
@@ -406,12 +419,12 @@ public class DayCycleManager : MonoBehaviour
             if (IsCharacterOnExpedition(character))
                 continue;
 
-            int penalty = MoralePenaltyPerDeath * report.deaths.Count;
+            int penalty = baseMoralePenaltyPerDeath * report.deaths.Count * populationMultiplier;
             character.morale -= penalty;
 
             report.survivalChanges.Add(
                 $"{character.fullName}: мораль −{penalty} " +
-                "из-за смерти жителей.");
+                $"из-за смерти жителей (множитель населения ×{populationMultiplier}).");
         }
     }
 
