@@ -42,7 +42,6 @@ public class RationMenuUI : MonoBehaviour, IOpenablePanel
 
     public void ClosePanel()
     {
-        // Назначения сохраняются. Здесь ничего не сбрасываем.
         gameObject.SetActive(false);
     }
 
@@ -113,19 +112,19 @@ public class RationMenuUI : MonoBehaviour, IOpenablePanel
         if (resources == null)
         {
             if (foodCountText != null)
-                foodCountText.text = "Еда: доступно —";
+                foodCountText.text = "Еда: —";
 
             if (waterCountText != null)
-                waterCountText.text = "Вода: доступно —";
+                waterCountText.text = "Вода: —";
 
             return;
         }
 
         if (foodCountText != null)
-            foodCountText.text = $"Еда: доступно {resources.FoodCans}";
+            foodCountText.text = $"Еда: {resources.FoodCans}";
 
         if (waterCountText != null)
-            waterCountText.text = $"Вода: доступно {resources.WaterBottles}";
+            waterCountText.text = $"Вода: {resources.WaterBottles}";
     }
 
     private void RebuildCards()
@@ -147,8 +146,7 @@ public class RationMenuUI : MonoBehaviour, IOpenablePanel
             Debug.LogError("В RationMenuUI не назначен Content для карточек.", this);
             return;
         }
-
-        // Удаляем только карточки пайков, оставляя прочие объекты Content.
+        
         for (int i = cardsContainer.childCount - 1; i >= 0; i--)
         {
             Transform child = cardsContainer.GetChild(i);

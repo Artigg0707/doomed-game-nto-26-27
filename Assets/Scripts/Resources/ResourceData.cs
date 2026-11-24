@@ -7,7 +7,7 @@ public class ResourceData
     public int waterBottles;
     public int fuelCans;
     public int currentDay;
-    public int temperatureLevel; // 3 = тепло, 2 = прохладно, 1 = холодно, 0 = обледенение
+    public int temperatureLevel; 
     public bool generatorBroken;
     public bool generatorIsOn = false;
 }

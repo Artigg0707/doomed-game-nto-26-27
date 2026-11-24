@@ -42,8 +42,7 @@ public class RationCharacterCardUI : MonoBehaviour
             Debug.LogError("В карточке пайка не назначены Toggle еды или воды.", this);
             return;
         }
-
-        // Удаляем старые подписки, чтобы при повторном Setup они не дублировались.
+        
         foodToggle.onValueChanged.RemoveListener(OnFoodToggleChanged);
         waterToggle.onValueChanged.RemoveListener(OnWaterToggleChanged);
 
@@ -53,8 +52,7 @@ public class RationCharacterCardUI : MonoBehaviour
         bool canReceiveRations = !character.isDead && !character.isExiled;
         foodToggle.interactable = canReceiveRations;
         waterToggle.interactable = canReceiveRations;
-
-        // Устанавливаем сохранённое состояние, не вызывая обработчики и не списывая ресурсы.
+        
         RefreshToggles();
     }
 
@@ -80,8 +78,7 @@ public class RationCharacterCardUI : MonoBehaviour
 
         characterManager.SetFoodRation(character, isOn);
         SyncFoodToggle();
-
-        // Проверяем, принял ли CharacterManager назначение.
+        
         if (isOn && !character.receivesFoodToday)
             messageCallback?.Invoke("Не удалось назначить еду.");
     }

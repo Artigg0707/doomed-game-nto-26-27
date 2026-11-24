@@ -3,7 +3,9 @@ using UnityEngine;
 
 public class DayCycleManager : MonoBehaviour
 {
-    private const int MoralePenaltyPerDeath = 10;
+    [Header("Мораль и потери")]
+    [SerializeField, Range(0, 50)] private int baseMoralePenaltyPerDeath = 10;
+
     private const int VictoryDay = 10;
 
     public static DayCycleManager Instance { get; private set; }
@@ -68,12 +70,10 @@ public class DayCycleManager : MonoBehaviour
             return;
         }
 
-        // Состояние до обработки ночи.
         int temperatureBefore = resources.TemperatureLevel;
         bool generatorWasBroken = resources.GeneratorBroken;
         bool generatorWasOn = resources.GeneratorIsOn;
 
-        // Тратим топливо на обогрев только если генератор включён и не сломан.
         bool fuelConsumed = false;
 
         if (generatorWasOn && !resources.GeneratorBroken)
@@ -81,10 +81,15 @@ public class DayCycleManager : MonoBehaviour
             fuelConsumed = resources.ConsumeFuel(1);
         }
 
-        if (!fuelConsumed)
+        if (fuelConsumed)
+        {
+            resources.AddTemperature(1);
+        }
+        else
+        {
             resources.SetTemperature(resources.TemperatureLevel - 1);
+        }
 
-        // Создаём отчёт за завершаемый день.
         NightReportData report = new NightReportData
         {
             completedDay = CurrentDay,
@@ -95,7 +100,6 @@ public class DayCycleManager : MonoBehaviour
             temperatureAfter = resources.TemperatureLevel
         };
 
-        // Проверяем выживание жителей, которые находятся в бункере.
         if (characterManager != null)
         {
             UpdateSurvivalCounters(resources, characterManager, report);
@@ -108,7 +112,6 @@ public class DayCycleManager : MonoBehaviour
                 this);
         }
 
-        // Переходим на новый день.
         CurrentDay++;
 
         if (resources.resourceData != null)
@@ -116,18 +119,12 @@ public class DayCycleManager : MonoBehaviour
 
         report.newDay = CurrentDay;
 
-        // Обрабатываем вылазки после увеличения CurrentDay.
-        // Отчёт ещё не отправлен в OnNightComplete, поэтому результаты
-        // экспедиций попадут в этот же отчёт.
         if (expeditionManager != null)
             expeditionManager.ProcessCompletedDay(report);
 
-        // Обрабатываем генератор ночью: случайная поломка и разрешение ремонта.
         if (electricalPanelController != null)
             electricalPanelController.ProcessGeneratorNight(report);
 
-        // Применяем последствия смертей и проверяем уход жителей.
-        // Персонажи, которые всё ещё находятся на вылазке, пропускаются.
         if (characterManager != null)
         {
             ApplyDeathMoralePenalty(characterManager, report);
@@ -136,6 +133,13 @@ public class DayCycleManager : MonoBehaviour
 
         OnDayChanged?.Invoke(CurrentDay);
         OnNightComplete?.Invoke(report);
+
+        if (EventManager.Instance != null)
+        {
+            var quietLine = EventManager.Instance.GetQuietLineForDay(CurrentDay);
+            if (!string.IsNullOrEmpty(quietLine) && report != null)
+                report.specialEvents.Add(quietLine);
+        }
 
         if (IsDefeat())
         {
@@ -226,12 +230,10 @@ public class DayCycleManager : MonoBehaviour
             {
                 if (character == null || character.isDead || character.isExiled)
                     continue;
-
-                // Отправленные персонажи не проходят ночную проверку бункера.
+                
                 if (IsCharacterOnExpedition(character))
                     continue;
-
-                // Еда.
+                
                 if (character.receivesFoodToday)
                 {
                     character.daysWithoutFood = 0;
@@ -241,8 +243,7 @@ public class DayCycleManager : MonoBehaviour
                 {
                     character.daysWithoutFood++;
                 }
-
-                // Вода.
+                
                 if (character.receivesWaterToday)
                 {
                     character.daysWithoutWater = 0;
@@ -252,11 +253,9 @@ public class DayCycleManager : MonoBehaviour
                 {
                     character.daysWithoutWater++;
                 }
-
-                // Статус жителя.
+                
                 report.survivalChanges.Add(GetCharacterStatus(character));
-
-                // Голод.
+                
                 if (character.daysWithoutFood == 1)
                 {
                     report.survivalChanges.Add(
@@ -291,8 +290,7 @@ public class DayCycleManager : MonoBehaviour
 
                 if (character.isDead)
                     continue;
-
-                // Жажда.
+                
                 if (character.daysWithoutWater == 1)
                 {
                     character.morale -= 5;
@@ -326,8 +324,7 @@ public class DayCycleManager : MonoBehaviour
                         report.deaths.Add(character.fullName);
                     }
                 }
-
-                // Холод (генерирует урон только если нет топлива)
+                
                 if (!character.isDead && resources.TemperatureLevel <= 1)
                 {
                     int coldDamage =
@@ -345,8 +342,7 @@ public class DayCycleManager : MonoBehaviour
                         report.deaths.Add(character.fullName);
                     }
                 }
-
-                // Восстановление после сна: +5 HP и +5 morale, если 2 дня подряд получал еду или воду
+                
                 if (!character.isDead)
                 {
                     bool foodRecovery = character.consecutiveFoodDays >= 2;
@@ -375,8 +371,7 @@ public class DayCycleManager : MonoBehaviour
                 }
             }
         }
-
-        // Ресурсы для отчёта.
+        
         if (report.fuelConsumed)
             report.resourceChanges.Add(
                 "Топлива −1 канистра (обогрев работал).");
@@ -412,6 +407,17 @@ public class DayCycleManager : MonoBehaviour
         if (cm.characters == null)
             return;
 
+        
+        int aliveCount = 0;
+        foreach (GeneratedCharacter c in cm.characters)
+        {
+            if (c != null && !c.isDead && !c.isExiled)
+                aliveCount++;
+        }
+
+        
+        int populationMultiplier = Mathf.Max(1, 6 - aliveCount);
+
         foreach (GeneratedCharacter character in cm.characters)
         {
             if (character == null || character.isDead || character.isExiled)
@@ -420,12 +426,12 @@ public class DayCycleManager : MonoBehaviour
             if (IsCharacterOnExpedition(character))
                 continue;
 
-            int penalty = MoralePenaltyPerDeath * report.deaths.Count;
+            int penalty = baseMoralePenaltyPerDeath * report.deaths.Count * populationMultiplier;
             character.morale -= penalty;
 
             report.survivalChanges.Add(
                 $"{character.fullName}: мораль −{penalty} " +
-                "из-за смерти жителей.");
+                $"из-за смерти жителей (множитель населения ×{populationMultiplier}).");
         }
     }
 

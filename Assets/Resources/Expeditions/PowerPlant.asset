@@ -12,16 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d48b6e3cac37ffd48965fe94155ba8b6, type: 3}
   m_Name: ThermalPowerPlant
   m_EditorClassIdentifier: Assembly-CSharp::ExpeditionLocationData
-  locationId: "thermal_power_plant"
-  locationName: "ТЭЦ"
+  locationId: thermal_power_plant
+  locationName: "\u0422\u042D\u0426"
   locationImage: {fileID: 0}
-  description: "Теплоэлектроцентраль на окраине города. Огромные цистерны с топливом и запчастями для генераторов. Объект сложно проникнуть и ещё сложнее выбраться."
-  riskDescription: "Уровень опасности: высокая. Шанс ранения: ~45% (урон 20–40 HP). Шанс гибели: ~25%. Только для подготовленной группы с ветераном или механиком."
+  description: "\u0422\u0435\u043F\u043B\u043E\u044D\u043B\u0435\u043A\u0442\u0440\u043E\u0446\u0435\u043D\u0442\u0440\u0430\u043B\u044C \u043D\u0430 \u043E\u043A\u0440\u0430\u0438\u043D\u0435 \u0433\u043E\u0440\u043E\u0434\u0430. \u041E\u0433\u0440\u043E\u043C\u043D\u044B\u0435 \u0446\u0438\u0441\u0442\u0435\u0440\u043D\u044B \u0441 \u0442\u043E\u043F\u043B\u0438\u0432\u043E\u043C \u0438 \u0437\u0430\u043F\u0447\u0430\u0441\u0442\u044F\u043C\u0438 \u0434\u043B\u044F \u0433\u0435\u043D\u0435\u0440\u0430\u0442\u043E\u0440\u043E\u0432. \u041E\u0431\u044A\u0435\u043A\u0442 \u0441\u043B\u043E\u0436\u043D\u043E \u043F\u0440\u043E\u043D\u0438\u043A\u043D\u0443\u0442\u044C \u0438 \u0435\u0449\u0451 \u0441\u043B\u043E\u0436\u043D\u0435\u0435 \u0432\u044B\u0431\u0440\u0430\u0442\u044C\u0441\u044F."
+  riskDescription: "\u0423\u0440\u043E\u0432\u0435\u043D\u044C \u043E\u043F\u0430\u0441\u043D\u043E\u0441\u0442\u0438: \u0432\u044B\u0441\u043E\u043A\u0430\u044F. \u0428\u0430\u043D\u0441 \u0440\u0430\u043D\u0435\u043D\u0438\u044F: ~45% (\u0443\u0440\u043E\u043D 20\u201340 HP). \u0428\u0430\u043D\u0441 \u0433\u0438\u0431\u0435\u043B\u0438: ~25%. \u0422\u043E\u043B\u044C\u043A\u043E \u0434\u043B\u044F \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043D\u043E\u0439 \u0433\u0440\u0443\u043F\u043F\u044B \u0441 \u0432\u0435\u0442\u0435\u0440\u0430\u043D\u043E\u043C \u0438\u043B\u0438 \u043C\u0435\u0445\u0430\u043D\u0438\u043A\u043E\u043C."
+  durationDays: 4
   injuryChancePercent: 45
   deathChancePercent: 25
   minInjuryDamage: 20
   maxInjuryDamage: 40
-  durationDays: 4
+  minCooldownDays: 4
+  maxCooldownDays: 6
   possibleRewards:
   - resourceType: 0
     minAmount: 0

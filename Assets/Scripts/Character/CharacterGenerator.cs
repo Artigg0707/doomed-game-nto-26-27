@@ -84,27 +84,27 @@ public class CharacterGenerator : MonoBehaviour
 
         character.age = Random.Range(profile.minAge, profile.maxAge + 1);
 
-        // ---- portrait: gender-separated and unique (picked once) ----
+       
         if (character.gender == GeneratedCharacter.Gender.Male)
         {
             if (availableMaleObliks != null && availableMaleObliks.Count > 0)
             {
                 int randomIndex = Random.Range(0, availableMaleObliks.Count);
                 character.portrait = availableMaleObliks[randomIndex];
-                availableMaleObliks.RemoveAt(randomIndex); // remove so it cannot be picked again
+                availableMaleObliks.RemoveAt(randomIndex); 
             }
             else
             {
                 character.portrait = null;
             }
         }
-        else // Female
+        else 
         {
             if (availableFemaleObliks != null && availableFemaleObliks.Count > 0)
             {
                 int randomIndex = Random.Range(0, availableFemaleObliks.Count);
                 character.portrait = availableFemaleObliks[randomIndex];
-                availableFemaleObliks.RemoveAt(randomIndex); // remove so it cannot be picked again
+                availableFemaleObliks.RemoveAt(randomIndex); 
             }
             else
             {

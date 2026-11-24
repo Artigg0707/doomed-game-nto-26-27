@@ -16,6 +16,14 @@ public class ElectricalPanelController : MonoBehaviour
     [SerializeField, Range(0, 100)] private int baseRepairInjuryChancePercent = 25;
     [SerializeField] private int repairFailureDamageHP = 15;
 
+    [Header("Зависимость от численности людей в бункере")]
+    [Tooltip("Шанс поломки генератора, если в бункере всего 1 живой человек (не на вылазке).")]
+    [SerializeField, Range(0, 100)] private int breakdownChanceForOnePerson = 60;
+    [Tooltip("На сколько уменьшается шанс поломки за каждого дополнительного живого человека в бункере.")]
+    [SerializeField, Range(0, 100)] private int breakdownReductionPerAdditionalPerson = 10;
+    [Tooltip("Бонус к шансу успешного починки генератора за каждого дополнительного живого человека в бункере.")]
+    [SerializeField, Range(0, 100)] private int repairSuccessBonusPerAdditionalPerson = 10;
+
     [Header("Статус")]
     public bool IsGeneratorWorking =>
         resourceManager != null &&
@@ -35,8 +43,7 @@ public class ElectricalPanelController : MonoBehaviour
 
     public event Action OnResourcesChanged;
     public event Action OnGeneratorStatusChanged;
-
-    // Починка на следующий день (runtime-состояние, сбрасывается при разрешении)
+    
     private GeneratedCharacter pendingRepairCharacter;
     private int pendingRepairDaySent = -1;
 
@@ -72,8 +79,7 @@ public class ElectricalPanelController : MonoBehaviour
         OnResourcesChanged?.Invoke();
         OnGeneratorStatusChanged?.Invoke();
     }
-
-    // Включить / выключить генератор.
+    
     public void ToggleGenerator()
     {
         if (resourceManager == null)
@@ -98,8 +104,7 @@ public class ElectricalPanelController : MonoBehaviour
         resourceManager.SetGeneratorOn(newState);
         Debug.Log(newState ? "Генератор включён." : "Генератор выключен.", this);
     }
-
-    // Список персонажей, доступных для починки генератора.
+    
     public List<GeneratedCharacter> GetAvailableRepairCharacters()
     {
         var result = new List<GeneratedCharacter>();
@@ -123,8 +128,7 @@ public class ElectricalPanelController : MonoBehaviour
 
         return result;
     }
-
-    // Отправить персонажа на починку. Ремонт разрешится следующей ночью.
+    
     public bool SendCharacterForRepair(GeneratedCharacter character, out string message)
     {
         message = "";
@@ -164,15 +168,12 @@ public class ElectricalPanelController : MonoBehaviour
         OnGeneratorStatusChanged?.Invoke();
         return true;
     }
-
-    // Вызывается DayCycleManager во время StartNextDay (ночной расчёт).
-    // Обрабатывает случайную поломку и разрешение отложенного ремонта.
+    
     public void ProcessGeneratorNight(NightReportData report)
     {
         if (resourceManager == null || report == null)
             return;
-
-        // 1. Случайная поломка генератора ночью (если он работал).
+        
         if (!resourceManager.GeneratorBroken &&
             resourceManager.GeneratorIsOn &&
             report.generatorWorked)
@@ -187,8 +188,7 @@ public class ElectricalPanelController : MonoBehaviour
                 OnGeneratorStatusChanged?.Invoke();
             }
         }
-
-        // 2. Разрешение починки, отправленной предыдущим днём.
+        
         if (HasPendingRepair)
         {
             ResolvePendingRepair(report);
@@ -201,7 +201,8 @@ public class ElectricalPanelController : MonoBehaviour
             return;
 
         GeneratedCharacter character = pendingRepairCharacter;
-        float successChance = baseRepairSuccessChancePercent;
+        int aliveInBunker = CountAliveInBunker();
+        float successChance = baseRepairSuccessChancePercent + (aliveInBunker - 1) * repairSuccessBonusPerAdditionalPerson;
 
         bool success = UnityEngine.Random.Range(0, 100) < successChance;
 
@@ -214,7 +215,6 @@ public class ElectricalPanelController : MonoBehaviour
         }
         else
         {
-            // Починка не удалась. Проверяем получение урона персонажем.
             bool canBeInjured = !HasTraitEffect(character, Trait.EffectType.NoInjuryOnGeneratorRepair);
 
             int injuryChance = baseRepairInjuryChancePercent;
@@ -255,16 +255,41 @@ public class ElectricalPanelController : MonoBehaviour
                 Debug.Log(msg, this);
             }
         }
-
-        // Очищаем отложенный ремонт (независимо от результата — нужно отправлять заново).
+        
         pendingRepairCharacter = null;
         pendingRepairDaySent = -1;
         OnGeneratorStatusChanged?.Invoke();
     }
 
+    private int CountAliveInBunker()
+    {
+        int count = 0;
+
+        if (characterManager != null && characterManager.characters != null)
+        {
+            foreach (GeneratedCharacter character in characterManager.characters)
+            {
+                if (character == null || character.isDead || character.isExiled)
+                    continue;
+                if (expeditionManager != null && expeditionManager.IsCharacterOnExpedition(character))
+                    continue;
+
+                count++;
+            }
+        }
+
+        return count;
+    }
+
     private float CalculateBreakdownChance()
     {
-        float chance = baseBreakdownChancePercent;
+        int aliveInBunker = CountAliveInBunker();
+
+        float chance;
+        if (aliveInBunker <= 1)
+            chance = breakdownChanceForOnePerson;
+        else
+            chance = Mathf.Max(0, breakdownChanceForOnePerson - (aliveInBunker - 1) * breakdownReductionPerAdditionalPerson);
 
         if (characterManager != null && characterManager.characters != null)
         {

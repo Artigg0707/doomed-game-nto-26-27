@@ -59,9 +59,7 @@ public class ExpeditionsTabUI : MonoBehaviour
             expeditionManager.OnExpeditionsChanged +=
                 HandleExpeditionsChanged;
         }
-
-        // При повторном открытии меню обновляем кнопки и список персонажей,
-        // сохраняя выбранную локацию, если она всё ещё есть в каталоге.
+        
         BuildLocationButtons(locationButtonsCreated);
     }
 
@@ -370,10 +368,7 @@ public class ExpeditionsTabUI : MonoBehaviour
         Debug.Log(message, this);
 
         SelectedCharacter = null;
-
-        // OnExpeditionsChanged также обновит кнопки.
-        // Здесь обновляем карточки на случай, если событие
-        // не было вызвано менеджером.
+        
         BuildCharacterCards();
         RefreshSendButton();
     }
@@ -386,8 +381,7 @@ public class ExpeditionsTabUI : MonoBehaviour
         {
             return 0;
         }
-
-        // В одной вылазке находится один персонаж.
+        
         int count = 0;
 
         foreach (GeneratedCharacter character

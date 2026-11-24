@@ -7,7 +7,7 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
     [Header("Ссылки")]
     [SerializeField] private MorningReportPanel morningReportPanel;
     [SerializeField] private DefeatScreenPanel defeatScreenPanel;
-    [SerializeField] private CanvasGroup fadePanel; // чёрная панель на Canvas для fade
+    [SerializeField] private CanvasGroup fadePanel; 
 
     [Header("Настройки")]
     [SerializeField] private float fadeDuration = 1f;
@@ -31,6 +31,24 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
             fadePanel.alpha = 0f;
 
         SubscribeToCycleEvents();
+    }
+
+    private DefeatScreenPanel ResolveDefeatPanel()
+    {
+        if (defeatScreenPanel != null)
+            return defeatScreenPanel;
+
+        if (DefeatScreenPanel.Instance != null)
+            return DefeatScreenPanel.Instance;
+        
+        var panels = FindObjectsOfType<DefeatScreenPanel>(true);
+        if (panels.Length > 0)
+        {
+            defeatScreenPanel = panels[0];
+            return defeatScreenPanel;
+        }
+
+        return null;
     }
 
     private void OnEnable()
@@ -74,8 +92,7 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
     private IEnumerator SleepSequence()
     {
         _isSleeping = true;
-
-        // Отключаем управление игроком
+        
         var playerMove = FindObjectOfType<PlayerMove>();
         if (playerMove != null)
             playerMove.enabled = false;
@@ -83,8 +100,7 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
         var interactor = FindObjectOfType<Interactor>();
         if (interactor != null)
             interactor.enabled = false;
-
-        // Fade to black
+        
         if (fadePanel != null)
         {
             float t = 0;
@@ -96,25 +112,24 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
             }
             fadePanel.alpha = 1f;
         }
-
-        // Запускаем ночной расчёт (вызовет OnNightComplete синхронно)
+        
         DayCycleManager.Instance.StartNextDay();
-
-        // Небольшая пауза, чтобы отчет успел сформироваться
+        
         yield return new WaitForSeconds(0.3f);
 
         if (_defeatOccurred ||
             (DayCycleManager.Instance != null &&
              DayCycleManager.Instance.IsDefeat()))
         {
-            DefeatScreenPanel panel = defeatScreenPanel != null
-                ? defeatScreenPanel
-                : DefeatScreenPanel.Instance;
+            DefeatScreenPanel panel = ResolveDefeatPanel();
 
             if (panel != null)
                 panel.Show();
             else
                 Debug.LogError("DefeatScreenPanel не найден.", this);
+            
+            if (fadePanel != null)
+                StartCoroutine(FadeInRoutine());
 
             yield break;
         }
@@ -123,26 +138,25 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
             (DayCycleManager.Instance != null &&
              DayCycleManager.Instance.IsVictory()))
         {
-            DefeatScreenPanel panel = defeatScreenPanel != null
-                ? defeatScreenPanel
-                : DefeatScreenPanel.Instance;
+            DefeatScreenPanel panel = ResolveDefeatPanel();
 
             if (panel != null)
                 panel.ShowVictory();
             else
                 Debug.LogError("DefeatScreenPanel не найден.", this);
+            
+            if (fadePanel != null)
+                StartCoroutine(FadeInRoutine());
 
             yield break;
         }
-
-        // Показываем панель утренней сводки (она уже получила данные через событие)
+        
         if (_pendingReport != null)
         {
             morningReportPanel.Show(_pendingReport, OnSummaryContinued);
         }
         else
         {
-            // Если события не было — просто продолжаем
             OnSummaryContinued();
         }
     }
@@ -164,7 +178,7 @@ public class InteractBed : MonoBehaviour, IInteractable, IHighlightable
 
     private void OnSummaryContinued()
     {
-        // Fade in
+        
         if (fadePanel != null)
         {
             StartCoroutine(FadeInRoutine());

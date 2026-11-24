@@ -17,6 +17,12 @@ public class ElectricalPanelUI : MonoBehaviour, IOpenablePanel
     [SerializeField] private TMP_Text statusText;
     [SerializeField] private TMP_Text messageText;
 
+    [Header("UI — цвета температуры")]
+    [SerializeField] private Color temperatureColorNormal = Color.white;
+    [SerializeField] private Color temperatureColorCold = new Color(0.5f, 0.8f, 1f, 1f);
+    [SerializeField] private Color temperatureColorFreezing = new Color(1f, 0.6f, 0.6f, 1f);
+    [SerializeField] private Color temperatureColorCritical = Color.red;
+
     [Header("UI — управление")]
     [SerializeField] private Button toggleGeneratorButton;
     [SerializeField] private TMP_Text toggleButtonText;
@@ -44,7 +50,6 @@ public class ElectricalPanelUI : MonoBehaviour, IOpenablePanel
     public void Open()
     {
         gameObject.SetActive(true);
-        SubscribeToEvents();
         if (messageText != null)
             messageText.text = "";
         Refresh();
@@ -111,9 +116,14 @@ public class ElectricalPanelUI : MonoBehaviour, IOpenablePanel
         ResourceManager resources = ResourceManager.Instance;
 
         if (temperatureText != null)
+        {
             temperatureText.text = resources != null
                 ? $"Температура: {resources.TemperatureLevel}/3"
                 : "Температура: —";
+
+            if (resources != null)
+                temperatureText.color = GetTemperatureColor(resources.TemperatureLevel);
+        }
 
         if (fuelCountText != null)
             fuelCountText.text = resources != null
@@ -122,6 +132,18 @@ public class ElectricalPanelUI : MonoBehaviour, IOpenablePanel
 
         if (statusText != null && panelController != null)
             statusText.text = $"Генератор: {panelController.GeneratorStatusText}";
+    }
+
+    private Color GetTemperatureColor(int level)
+    {
+        switch (level)
+        {
+            case 3: return temperatureColorNormal;
+            case 2: return temperatureColorCold;
+            case 1: return temperatureColorFreezing;
+            case 0: return temperatureColorCritical;
+            default: return Color.white;
+        }
     }
 
     private void RefreshToggleButton()

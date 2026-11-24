@@ -32,8 +32,7 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
             else if (mats.Length == 1)
                 _outlineMaterial = mats[0];
         }
-
-        // ������ �������������: ��� ������� ������ � ����� �� ���������.
+        
         if (objCam != null)
             objCam.Priority = 0;
 
@@ -44,8 +43,7 @@ public class InteractPC : MonoBehaviour, IInteractable, IHighlightable
     {
         if (Input.GetKeyDown(KeyCode.N))
             outCam();
-
-        // ������� ���������� ��������� ����� �������� ������.
+        
         if (_isInteracting &&
             panelToOpen != null &&
             !panelToOpen.activeInHierarchy)

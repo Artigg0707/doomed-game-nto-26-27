@@ -24,7 +24,13 @@ public class ExpeditionManager : MonoBehaviour
     [SerializeField] private CharacterManager characterManager;
 
     [Header("Limits")]
-    [SerializeField, Min(1)] private int maxActiveExpeditions = 2;
+    [Header("Expedition population dependence")]
+    [Tooltip("Base population at which expedition is considered safe (no extra chances).")]
+    [SerializeField, Min(1)] private int referencePopulation = 5;
+    [Tooltip("How much death chance on expedition increases per each missing person in bunker (below referencePopulation).")]
+    [SerializeField, Range(0, 100)] private int expeditionDeathChanceIncreasePerMissingPerson = 5;
+    [Tooltip("How much injury chance on expedition increases per each missing person in bunker (below referencePopulation).")]
+    [SerializeField, Range(0, 100)] private int expeditionInjuryChanceIncreasePerMissingPerson = 5;
 
     [Header("Runtime state")]
     [SerializeField] private List<ExpeditionRun> activeExpeditions =
@@ -39,7 +45,19 @@ public class ExpeditionManager : MonoBehaviour
         activeExpeditions != null ? activeExpeditions.Count : 0;
 
     public int MaxConcurrentExpeditions =>
-        Mathf.Max(1, maxActiveExpeditions);
+        Mathf.Max(1, Mathf.RoundToInt(AliveCharactersCount() / 2f));
+
+    private int AliveCharactersCount()
+    {
+        if (characterManager == null || characterManager.characters == null) return 1;
+        int count = 0;
+        foreach (var character in characterManager.characters)
+        {
+            if (character != null && !character.isDead && !character.isExiled && !IsCharacterOnExpedition(character))
+                count++;
+        }
+        return Mathf.Max(1, count);
+    }
 
     private int lastProcessedDay = -1;
 
@@ -199,9 +217,7 @@ public class ExpeditionManager : MonoBehaviour
             message = "Этот персонаж уже находится в вылазке.";
             return false;
         }
-
-        // Назначенные пайки отменяются через существующий CharacterManager.
-        // Ресурсы возвращаются, а счётчики голода и жажды здесь не меняются.
+        
         if (character.receivesFoodToday)
             characterManager.SetFoodRation(character, false);
 
@@ -231,13 +247,11 @@ public class ExpeditionManager : MonoBehaviour
         OnExpeditionsChanged?.Invoke();
         return true;
     }
-
-    // Вызывать один раз после продвижения игрового дня.
+    
     public void ProcessCompletedDay(NightReportData report)
     {
         int processingDay = CurrentDay;
-
-        // Не даём случайно обработать один и тот же день дважды.
+        
         if (lastProcessedDay == processingDay)
             return;
 
@@ -272,8 +286,7 @@ public class ExpeditionManager : MonoBehaviour
         }
 
         RemoveExpiredCooldowns(processingDay);
-
-        // Это событие также обновляет UI, когда локация снова становится доступна.
+        
         OnExpeditionsChanged?.Invoke();
     }
 
@@ -292,9 +305,17 @@ public class ExpeditionManager : MonoBehaviour
 
         if (location == null)
             return $"{character.fullName} вернулся(лась), но локация не найдена.";
+        
+        int aliveInBunker = CountAliveInBunker();
+        int missingPeople = Mathf.Max(0, referencePopulation - aliveInBunker);
+        int adjustedDeathChance = Mathf.Clamp(
+            location.deathChancePercent + missingPeople * expeditionDeathChanceIncreasePerMissingPerson,
+            0, 100);
+        int adjustedInjuryChance = Mathf.Clamp(
+            location.injuryChancePercent + missingPeople * expeditionInjuryChanceIncreasePerMissingPerson,
+            0, 100);
 
-        // Сначала проверяется риск смерти.
-        if (RollChance(location.deathChancePercent))
+        if (RollChance(adjustedDeathChance))
         {
             MarkCharacterDead(character, report);
 
@@ -302,11 +323,10 @@ public class ExpeditionManager : MonoBehaviour
                 $"{character.fullName} погиб(ла) во время вылазки " +
                 $"в «{location.locationName}». Награды не получены.";
         }
-
-        // Если персонаж пережил проверку смерти, отдельно проверяем ранение.
+        
         string injuryMessage = "";
 
-        if (RollChance(location.injuryChancePercent))
+        if (RollChance(adjustedInjuryChance))
         {
             int minDamage = Mathf.Max(0, location.minInjuryDamage);
             int maxDamage = Mathf.Max(minDamage, location.maxInjuryDamage);
@@ -333,6 +353,26 @@ public class ExpeditionManager : MonoBehaviour
         return
             $"{character.fullName} вернулся(лась) из локации " +
             $"«{location.locationName}».{injuryMessage} Награды: {rewards}.";
+    }
+
+    private int CountAliveInBunker()
+    {
+        int count = 0;
+
+        if (characterManager != null && characterManager.characters != null)
+        {
+            foreach (GeneratedCharacter character in characterManager.characters)
+            {
+                if (character == null || character.isDead || character.isExiled)
+                    continue;
+                if (IsCharacterOnExpedition(character))
+                    continue;
+
+                count++;
+            }
+        }
+
+        return count;
     }
 
     private bool RollChance(int chancePercent)
@@ -390,9 +430,7 @@ public class ExpeditionManager : MonoBehaviour
 
             int minAmount = Mathf.Max(0, reward.minAmount);
             int maxAmount = Mathf.Max(minAmount, reward.maxAmount);
-
-            // Для int верхняя граница Random.Range не включается,
-            // поэтому добавляем 1.
+            
             int amount = UnityEngine.Random.Range(minAmount, maxAmount + 1);
 
             if (amount <= 0)
