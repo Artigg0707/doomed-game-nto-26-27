@@ -25,8 +25,8 @@ public class DoorNoteData : ScriptableObject
 
     public enum SpawnType
     {
-        Scheduled,  // по конкретному дню (Trigger Day)
-        Random      // по шансу в любой день без запланированной записи
+        Scheduled,  
+        Random      
     }
 
     public NoteType noteType;
@@ -36,7 +36,7 @@ public class DoorNoteData : ScriptableObject
     public string text;
     public int triggerDay;
     [Range(0, 100)]
-    public int randomChance; // шанс появиться в день, когда нет запланированной записи (0-100)
+    public int randomChance; 
     public string morningReportLine;
     public List<Option> options = new List<Option>();
 }

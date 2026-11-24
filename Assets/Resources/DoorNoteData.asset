@@ -13,16 +13,17 @@ MonoBehaviour:
   m_Name: DoorNoteData
   m_EditorClassIdentifier: Assembly-CSharp::DoorNoteData
   noteType: 2
+  spawnType: 0
   title: "\u0421\u044E\u0436\u0435\u04421"
   text: "\u0422\u0435\u0441\u0442\u043E\u0432\u0430\u044F \u0437\u0430\u043C\u0442\u043A\u0430"
-  triggerDay: 0
-  morningReportLine: 
+  triggerDay: 2
+  randomChance: 100
+  morningReportLine: "\u044F \u0441\u043E\u0441\u0443 \u0431\u0438\u0431\u0443"
   options:
-  - buttonText: 
-    deltaFood: 0
-    deltaWater: 0
+  - buttonText: "\u0431\u0430\u0430\u043D"
+    deltaFood: 35
+    deltaWater: 83
     deltaFuel: 0
     deltaMorale: 0
     hpDamage: 0
-    spawnCharacterChance: 0
-    movesToNextDay: 0
+    spawnCharacterChance: 100

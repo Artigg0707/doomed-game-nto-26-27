@@ -71,11 +71,11 @@ public class MorningReportPanel : MonoBehaviour
     {
         Hide();
 
-        // Закрываем меню кровати
+        
         if (bedMenuPanel != null)
             bedMenuPanel.SetActive(false);
 
-        // Возвращаем приоритет базовой камере игрока
+        
         if (playerCamera != null)
             playerCamera.Priority = playerCameraBasePriority;
 
@@ -90,7 +90,7 @@ public class MorningReportPanel : MonoBehaviour
         sb.AppendLine($"День {r.completedDay} закончен. Наступает день {r.newDay}.");
         sb.AppendLine();
 
-        // Состояние бункера
+        
         if (r.fuelConsumed)
             sb.AppendLine("Генератор проработал всю ночь. Потрачено 1 канистру топлива.");
         else
@@ -99,7 +99,7 @@ public class MorningReportPanel : MonoBehaviour
         sb.AppendLine($"Температура в бункере: {r.temperatureBefore} → {r.temperatureAfter}");
         sb.AppendLine();
 
-        // Ресурсы на складе (всегда показываем)
+        
         sb.AppendLine("Запасы на складе:");
         if (r.resourceChanges.Count > 0)
         {
@@ -113,7 +113,7 @@ public class MorningReportPanel : MonoBehaviour
 
         sb.AppendLine();
 
-        // Состояние жителей (всегда показываем всех)
+        
         sb.AppendLine("Состояние жителей:");
         if (r.survivalChanges.Count > 0)
         {
@@ -125,15 +125,15 @@ public class MorningReportPanel : MonoBehaviour
             sb.AppendLine("► Нет жителей в бункере.");
         }
 
-        // Смерти
+        
         foreach (var d in r.deaths)
             sb.AppendLine($"► {d} не выжил.");
 
-        // Уходы из бункера
+        
         foreach (var d in r.departures)
             sb.AppendLine($"► {d} ушёл из бункера, не выдержав происходящего.");
 
-        // Возвращение Expedition
+       
         if (r.expeditionReturns.Count > 0)
         {
             sb.AppendLine();
@@ -142,18 +142,20 @@ public class MorningReportPanel : MonoBehaviour
                 sb.AppendLine($"► {e}");
         }
 
-        // События с генератором (поломка и ремонт)
+        
         if (r.specialEvents.Count > 0)
         {
             sb.AppendLine();
-            sb.AppendLine("Генератор:");
+            sb.AppendLine("Особые события:");
             foreach (var e in r.specialEvents)
                 sb.AppendLine($"► {e}");
         }
 
         sb.AppendLine();
 
-        // Итоговая строка
+        
+        
+        
         sb.AppendLine(r.GetSummaryLine());
 
         sb.AppendLine();
