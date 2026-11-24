@@ -190,7 +190,7 @@ public class ElectricalPanelUI : MonoBehaviour, IOpenablePanel
         if (cardsContainer == null || cardPrefab == null || panelController == null)
             return;
 
-        // Удаляем старые карточки.
+        
         for (int i = cardsContainer.childCount - 1; i >= 0; i--)
         {
             Transform child = cardsContainer.GetChild(i);
@@ -209,7 +209,7 @@ public class ElectricalPanelUI : MonoBehaviour, IOpenablePanel
             characterCards.Add(card);
         }
 
-        // Если ранее выбранный персонаж стал недоступен, сбрасываем выбор.
+        
         if (selectedRepairCharacter != null && !available.Contains(selectedRepairCharacter))
         {
             selectedRepairCharacter = null;

@@ -24,6 +24,18 @@ public class EventManager : MonoBehaviour
     private void Start()
     {
         DayCycleManager.Instance.OnDayChanged += OnNewDay;
+
+        
+        
+        if (notes.Count == 0)
+        {
+            var loaded = Resources.LoadAll<DoorNoteData>("");
+            if (loaded.Length > 0)
+            {
+                notes.AddRange(loaded);
+                Debug.Log($"[EventManager] Auto-loaded notes from Resources: {loaded.Length}");
+            }
+        }
     }
 
     private void OnDestroy()
@@ -47,7 +59,7 @@ public class EventManager : MonoBehaviour
             }
         }
 
-        // 2. If no scheduled note - check random notes by chance
+        
         foreach (var note in notes)
         {
             if (note != null && note.spawnType == DoorNoteData.SpawnType.Random && note.randomChance > 0)
