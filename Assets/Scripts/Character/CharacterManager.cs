@@ -269,9 +269,28 @@ public class CharacterManager : MonoBehaviour
             edgePadding -
             cardHeight * 0.5f;
 
-        return new Vector2(
-            startX + column * stepX,
-            startY - row * stepY);
+        float halfWidth = newCard.rect.width * 0.5f;
+        float halfHeight = newCard.rect.height * 0.5f;
+
+        float minX = area.xMin + halfWidth + edgePadding;
+        float maxX = area.xMax - halfWidth - edgePadding;
+        float minY = area.yMin + halfHeight + edgePadding;
+        float maxY = area.yMax - halfHeight - edgePadding;
+
+        float x = startX + column * stepX;
+        float y = startY - row * stepY;
+
+        if (minX > maxX)
+            x = area.center.x;
+        else
+            x = Mathf.Clamp(x, minX, maxX);
+
+        if (minY > maxY)
+            y = area.center.y;
+        else
+            y = Mathf.Clamp(y, minY, maxY);
+
+        return new Vector2(x, y);
     }
 
     private void RemoveInactiveCharacterCards()
@@ -311,7 +330,10 @@ public class CharacterManager : MonoBehaviour
         float maxY = area.yMax - halfHeight - edgePadding;
 
         if (minX > maxX || minY > maxY)
-            return false;
+        {
+            position = area.center;
+            return true;
+        }
 
         CharacterCardUI[] cards = cardContainer.GetComponentsInChildren<CharacterCardUI>(true);
 

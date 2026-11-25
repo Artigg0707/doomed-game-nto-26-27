@@ -69,14 +69,21 @@ public class CharacterCardDrag : MonoBehaviour,
     private void MoveCard(PointerEventData eventData)
     {
         if (!TryGetPointerPosition(eventData, out Vector2 pointerPosition))
+        {
+            Debug.LogWarning(
+                $"[CharacterCardDrag] Не удалось вычислить позицию курсора (eventCamera = null?). " +
+                $"Назначьте камеру в поле Canvas › Event Camera. Карточка: {name}",
+                this
+            );
             return;
+        }
 
         Vector2 targetPosition = ClampToBoard(pointerPosition + pointerOffset);
 
         cardRect.localPosition = new Vector3(
             targetPosition.x,
             targetPosition.y,
-            0f
+            cardRect.localPosition.z
         );
     }
 

@@ -118,8 +118,8 @@ public class ElectricalPanelUI : MonoBehaviour, IOpenablePanel
         if (temperatureText != null)
         {
             temperatureText.text = resources != null
-                ? $"Температура: {resources.TemperatureLevel}/3"
-                : "Температура: —";
+                ? $" {resources.TemperatureLevel}/3"
+                : " —";
 
             if (resources != null)
                 temperatureText.color = GetTemperatureColor(resources.TemperatureLevel);
@@ -127,8 +127,8 @@ public class ElectricalPanelUI : MonoBehaviour, IOpenablePanel
 
         if (fuelCountText != null)
             fuelCountText.text = resources != null
-                ? $"Топливо: {resources.FuelCans} канистр"
-                : "Топливо: —";
+                ? $" {resources.FuelCans}"
+                : " —";
 
         if (statusText != null && panelController != null)
             statusText.text = $"Генератор: {panelController.GeneratorStatusText}";
