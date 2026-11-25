@@ -1,0 +1,196 @@
+flowchart TD
+    %% ==================== STYLES ====================
+    classDef manager fill:#1e3a5f,stroke:#4da6ff,stroke-width:2px,color:#fff
+    classDef data fill:#2d5a27,stroke:#7ee77e,stroke-width:2px,color:#fff
+    classDef ui fill:#5a2d5a,stroke:#e77ee7,stroke-width:2px,color:#fff
+    classDef interact fill:#5a4a1e,stroke:#ffe77e,stroke-width:2px,color:#fff
+    classDef player fill:#5a1e1e,stroke:#ff7e7e,stroke-width:2px,color:#fff
+    classDef event fill:#3a3a3a,stroke:#aaa,stroke-width:1px,stroke-dasharray: 5 5,color:#ddd
+    classDef core fill:#0d1b2a,stroke:#4da6ff,stroke-width:3px,color:#fff
+
+    %% ==================== PLAYER INPUT ====================
+    subgraph INPUT["🎮 PLAYER INPUT"]
+        Mouse["Mouse / Keyboard"]
+        Esc["Escape Key"]
+    end
+
+    %% ==================== INTERACTION SYSTEM ====================
+    subgraph INTERACTION["🖱️ INTERACTION SYSTEM (Scene Objects)"]
+        direction TB
+        Interactor["Interactor (на камере игрока)\nRaycast → IInteractable.Interact()\nHighlight → IHighlightable"]
+        
+        InteractPC["InteractPC (ПК, Стол, Монитор)\n→ objCam.Priority=20\n→ IOpenablePanel.Open()"]
+        InteractDoor["InteractDoor (Дверь)\n→ EventManager.HasActiveNote()\n→ DoorNoteUI.Show()"]
+        InteractNote["InteractNote (Записка)\n→ DoorNoteUI.Show()"]
+        InteractBed["InteractBed (Кровать)\n→ SleepSequence()\n→ DayCycleManager.StartNextDay()"]
+        BedTrigger["BedSleepTrigger (Альт. триггер)\n→ Event-subscribed\n→ _pendingReport из OnNightComplete"]
+        InteractElectro["InteractElectricalPanel (Щиток)\n→ ElectricalPanelUI.Open()"]
+    end
+
+    %% ==================== MANAGERS (SINGLETONS) ====================
+    subgraph MANAGERS["⚙️ CORE MANAGERS (Singletons)"]
+        direction TB
+        ResMgr["ResourceManager\n━━━━━━━━━━━━━━━━━━\nfood, water, fuel, temp, generator\nOnResourcesChanged"]
+        CharMgr["CharacterManager\n━━━━━━━━━━━━━━━━━━\ncharacters[], generator, rations\nOnRationsChanged"]
+        DayCycle["DayCycleManager\n━━━━━━━━━━━━━━━━━━\nCurrentDay, VictoryDay=10\nOnDayChanged, OnNightComplete\nOnDefeat, OnVictory"]
+        ExpMgr["ExpeditionManager\n━━━━━━━━━━━━━━━━━━\nactiveExpeditions, cooldowns\nOnExpeditionsChanged"]
+        ElecCtrl["ElectricalPanelController\n━━━━━━━━━━━━━━━━━━\nbreakdown/repair chances, traits\nOnGeneratorStatusChanged"]
+        EvtMgr["EventManager\n━━━━━━━━━━━━━━━━━━\nnotes, _activeNote, scheduled/random"]
+    end
+
+    %% ==================== DATA MODELS ====================
+    subgraph DATA["📦 DATA MODELS & SCRIPTABLEOBJECTS"]
+        direction TB
+        ResData["ResourceData (Serializable)\nfood, water, fuel, day, temp, genBroken, genOn"]
+        CharData["GeneratedCharacter (Serializable)\nhealth, morale, hunger, thirst, traits, dead, exiled"]
+        NightReport["NightReportData (Serializable)\ncompletedDay, fuelConsumed, tempBefore/After\nresourceChanges, survivalChanges, deaths\ndepartures, expeditionReturns, specialEvents"]
+        ExpLoc["ExpeditionLocationData (ScriptableObject)\nid, name, duration, death/injury chance\ncooldown, rewards[]"]
+        ExpReward["ExpeditionRewardData\nresourceType, min/maxAmount"]
+        DoorNote["DoorNoteData (ScriptableObject)\nspawnType, triggerDay, randomChance\noptions[deltaRes, morale, hpDamage, spawnChance]"]
+        CharProfile["CharaterObject (ScriptableObject)\nportraits, names, age, traits[]"]
+        TraitData["Trait + Effect (Serializable)\neffectType, value\nElectricityBreakChanceChangePoints\nElectricityRepairInjuryChanceChangePoints\nNoInjuryOnGeneratorRepair\nCannotRepairElectricity"]
+    end
+
+    %% ==================== UI PANELS ====================
+    subgraph UI["🖥️ UI PANELS"]
+        direction TB
+        RationUI["RationMenuUI\n← CharacterManager.OnRationsChanged\n→ SetFoodRation/SetWaterRation"]
+        MorningUI["MorningReportPanel\n← NightReportData\n→ BuildReportText + CommandantComment"]
+        DefeatUI["DefeatScreenPanel\n← daysSurvived, survivors, deaths, exiled\n→ RestartGame / QuitGame"]
+        ElectroUI["ElectricalPanelUI\n← ElectricalPanelController.OnGeneratorStatusChanged\n→ ToggleGenerator, SendCharacterForRepair"]
+        ExpPages["ExpeditionPagesSwitcher\n→ ShowExpeditions / ShowActiveExpeditions"]
+        ActiveExpUI["ActiveExpeditionsUI\n← ExpeditionManager.OnExpeditionsChanged\n→ entries: name, location, daysRemaining"]
+        LocBtnUI["ExpeditionLocationButtonUI\n→ Setup(location, manager)\n→ cooldown, risk, unavailable reason"]
+        DoorNoteUI["DoorNoteUI\n→ Show(note), options → EventManager.ApplyOption"]
+        BioPanel["CharacterBioPanelUI\n→ Show(character)"]
+        CardUI["CharacterCardUI\n→ Setup(character, bioPanel), Drag"]
+    end
+
+    %% ==================== PLAYER & CAMERA ====================
+    subgraph PLAYER["👤 PLAYER & CAMERA"]
+        PlayerMove["PlayerMove (CharacterController)\n← disabled during sleep"]
+        CamLook["CinemachineCursorLook (Mouse look)"]
+        CamInteractor["Interactor (на КамераИгрока)\n→ Raycast from screen center"]
+        QuitBtn["Quit (Main Camera)\n→ Escape → Application.Quit"]
+    end
+
+    %% ==================== CONNECTIONS ====================
+    %% Input → Interactor
+    Mouse --> Interactor
+    Esc --> QuitBtn
+
+    %% Interactor → Interactables
+    Interactor --> InteractPC
+    Interactor --> InteractDoor
+    Interactor --> InteractNote
+    Interactor --> InteractBed
+    Interactor --> InteractElectro
+    Interactor -.-> BedTrigger
+
+    %% Interactables → Managers/UI
+    InteractPC --> ExpPages
+    InteractPC --> ElectroUI
+    InteractDoor --> DoorNoteUI
+    InteractNote --> DoorNoteUI
+    InteractBed --> DayCycle
+    BedTrigger --> DayCycle
+    InteractElectro --> ElectroUI
+
+    %% UI → Managers
+    RationUI --> CharMgr
+    MorningUI --> DayCycle
+    DefeatUI --> DayCycle
+    ElectroUI --> ElecCtrl
+    ActiveExpUI --> ExpMgr
+    LocBtnUI --> ExpMgr
+    DoorNoteUI --> EvtMgr
+    CardUI --> CharMgr
+    BioPanel --> CharMgr
+
+    %% Managers → Data (read/write)
+    ResMgr --> ResData
+    CharMgr --> CharData
+    DayCycle --> NightReport
+    ExpMgr --> ExpLoc
+    ExpMgr --> ExpReward
+    EvtMgr --> DoorNote
+    CharMgr --> CharProfile
+    ElecCtrl --> TraitData
+    ExpMgr --> TraitData
+    DayCycle --> TraitData
+
+    %% Managers ↔ Managers (events & calls)
+    DayCycle --> ResMgr
+    DayCycle --> CharMgr
+    DayCycle --> ExpMgr
+    DayCycle --> ElecCtrl
+    DayCycle --> EvtMgr
+
+    CharMgr --> ResMgr
+    CharMgr --> DayCycle
+    ExpMgr --> CharMgr
+    ExpMgr --> ResMgr
+    ExpMgr --> DayCycle
+    ElecCtrl --> ResMgr
+    ElecCtrl --> CharMgr
+    ElecCtrl --> ExpMgr
+    EvtMgr --> ResMgr
+    EvtMgr --> CharMgr
+    EvtMgr --> DayCycle
+
+    %% Events (dashed)
+    ResMgr -.->|OnResourcesChanged| CharMgr
+    ResMgr -.->|OnResourcesChanged| ElecCtrl
+    ResMgr -.->|OnResourcesChanged| DayCycle
+    ResMgr -.->|OnResourcesChanged| ExpMgr
+    ResMgr -.->|OnResourcesChanged| EvtMgr
+
+    CharMgr -.->|OnRationsChanged| RationUI
+    CharMgr -.->|OnNightComplete| DayCycle
+
+    DayCycle -.->|OnDayChanged| ExpMgr
+    DayCycle -.->|OnDayChanged| EvtMgr
+    DayCycle -.->|OnDayChanged| InteractDoor
+    DayCycle -.->|OnNightComplete| BedTrigger
+    DayCycle -.->|OnNightComplete| MorningUI
+    DayCycle -.->|OnNightComplete| CharMgr
+    DayCycle -.->|OnDefeat| DefeatUI
+    DayCycle -.->|OnDefeat| BedTrigger
+    DayCycle -.->|OnVictory| DefeatUI
+    DayCycle -.->|OnVictory| BedTrigger
+
+    ExpMgr -.->|OnExpeditionsChanged| ActiveExpUI
+    ExpMgr -.->|OnExpeditionsChanged| LocBtnUI
+
+    ElecCtrl -.->|OnGeneratorStatusChanged| ElectroUI
+    ElecCtrl -.->|OnResourcesChanged| ResMgr
+
+    %% Player ↔ Interactor
+    PlayerMove --> CamInteractor
+    CamLook --> CamInteractor
+    CamInteractor --> Interactor
+
+    %% Bootstrap
+    subgraph BOOT["🚀 BOOTSTRAP (Awake/Start)"]
+        direction LR
+        Awake["Awake: Singletons init\nInstance, GetComponent/FindObjectOfType"]
+        Start["Start: GenerateInitialCharacters(5)\nEventManager.LoadNotes + OnNewDay\nSubscribe: BedTrigger, ActiveExpUI, RationUI"]
+        ResInit["ResourceManager.Awake: Random 8-10 food/water, 4-6 fuel, temp=3"]
+        DayInit["DayCycleManager.Awake: Sync CurrentDay from ResourceData"]
+    end
+
+    Awake --> Start
+    Awake --> ResInit
+    Awake --> DayInit
+
+    %% Win/Loss
+    DayCycle -->|IsDefeat()| DefeatUI
+    DayCycle -->|IsVictory()| DefeatUI
+
+    %% Class assignments
+    class ResMgr,CharMgr,DayCycle,ExpMgr,ElecCtrl,EvtMgr manager
+    class ResData,CharData,NightReport,ExpLoc,ExpReward,DoorNote,CharProfile,TraitData data
+    class RationUI,MorningUI,DefeatUI,ElectroUI,ExpPages,ActiveExpUI,LocBtnUI,DoorNoteUI,BioPanel,CardUI ui
+    class Interactor,InteractPC,InteractDoor,InteractNote,InteractBed,BedTrigger,InteractElectro interact
+    class PlayerMove,CamLook,CamInteractor,QuitBtn player
+    class Awake,Start,ResInit,DayInit core

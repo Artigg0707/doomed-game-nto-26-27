@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="52d088d8-d3e9-48d3-92c8-758b5868b995" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Assets/Documentation/НТО/.obsidian/workspace.json" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Documentation/НТО/.obsidian/workspace.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Documentation/НТО/_Упрощенная_версия_игры_1.5_недели/07_Упрощенная_система_параметров_и_формул.md" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Documentation/НТО/_Упрощенная_версия_игры_1.5_недели/07_Упрощенная_система_параметров_и_формул.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Documentation/НТО/Задачи/Системы игры/01 Общий цикл систем.md" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Documentation/НТО/Задачи/Системы игры/01 Общий цикл систем.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Documentation/НТО/Старт здесь.md" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Documentation/НТО/Старт здесь.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/TextMesh Pro/Resources/Fonts &amp; Materials/LiberationSans SDF - Fallback.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TextMesh Pro/Resources/Fonts &amp; Materials/LiberationSans SDF - Fallback.asset" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3MbaW8I6diJfv3tJgFuLHYZIs06" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-eff1e8def5f5-5bd6d13a2a75-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-262.10315.174" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="52d088d8-d3e9-48d3-92c8-758b5868b995" name="Changes" comment="" />
+      <created>1795621751907</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1795621751907</updated>
+      <workItem from="1795621752117" duration="61000" />
+      <workItem from="1795621932883" duration="1915000" />
+      <workItem from="1795625111527" duration="69000" />
+      <workItem from="1795625885774" duration="185000" />
+      <workItem from="1795626094149" duration="1046000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
