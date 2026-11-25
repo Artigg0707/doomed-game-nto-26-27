@@ -23,6 +23,14 @@ public class EventManager : MonoBehaviour
 
     private void Start()
     {
+        if (DayCycleManager.Instance == null)
+        {
+            Debug.LogError(
+                "[EventManager] DayCycleManager.Instance не найден на сцене. " +
+                "Подписка на смену дня пропущена, события не будут работать.", this);
+            return;
+        }
+
         DayCycleManager.Instance.OnDayChanged += OnNewDay;
 
         if (notes.Count == 0)

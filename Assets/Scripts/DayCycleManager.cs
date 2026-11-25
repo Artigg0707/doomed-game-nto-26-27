@@ -1,14 +1,26 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DayCycleManager : MonoBehaviour
 {
-    [Header("Мораль и потери")]
-    [SerializeField, Range(0, 50)] private int baseMoralePenaltyPerDeath = 10;
+    [Header("Конфиг выживания")]
+    [SerializeField] private SurvivalConfig survivalConfig;
 
-    private const int VictoryDay = 10;
+    // Запасное значение — используется только если SurvivalConfig не назначен.
+    // Основные настройки теперь задаются в SurvivalConfig.asset.
+    [SerializeField, Range(0, 50), Tooltip("Запасной штраф морали за смерть, если конфиг не назначен")]
+    private int baseMoralePenaltyPerDeathFallback = 10;
 
     public static DayCycleManager Instance { get; private set; }
+
+    private int VictoryDay =>
+        survivalConfig != null ? survivalConfig.victoryDay : 10;
+
+    private int BaseMoralePenaltyPerDeath =>
+        survivalConfig != null ? survivalConfig.baseMoralePenaltyPerDeath : baseMoralePenaltyPerDeathFallback;
+
+    private bool _configMissingWarned;
 
     [SerializeField] private ExpeditionManager expeditionManager;
     [SerializeField] private CharacterManager characterManager;
@@ -51,6 +63,22 @@ public class DayCycleManager : MonoBehaviour
                 CurrentDay = resources.resourceData.currentDay;
             else
                 resources.resourceData.currentDay = 1;
+        }
+
+        if (survivalConfig == null)
+        {
+            var found = Resources.LoadAll<SurvivalConfig>("");
+            if (found.Length > 0)
+                survivalConfig = found[0];
+        }
+
+        if (survivalConfig == null && !_configMissingWarned)
+        {
+            _configMissingWarned = true;
+            Debug.LogWarning(
+                "DayCycleManager: SurvivalConfig не назначен и не найден в Resources. " +
+                "Будут использованы значения по умолчанию (победа на 10-й день).",
+                this);
         }
     }
 
@@ -259,32 +287,18 @@ public class DayCycleManager : MonoBehaviour
                 
                 report.survivalChanges.Add(GetCharacterStatus(character));
                 
-                if (character.daysWithoutFood == 1)
+                var hungerRow = GetPenaltyRow(survivalConfig?.hungerPenalties, character.daysWithoutFood);
+                if (hungerRow != null)
                 {
-                    report.survivalChanges.Add(
-                        "  -> Голод 1 день (без штрафа)");
-                }
-                else if (character.daysWithoutFood == 2)
-                {
-                    character.morale -= 5;
-                    report.survivalChanges.Add(
-                        "  -> мораль −5 (голод 2 дня)");
-                }
-                else if (character.daysWithoutFood == 3)
-                {
-                    character.health -= 10;
-                    character.morale -= 10;
-                    report.survivalChanges.Add(
-                        "  -> Истощен! −10 HP, −10 мораль.");
-                }
-                else if (character.daysWithoutFood >= 4)
-                {
-                    character.health -= 15;
-                    character.morale -= 15;
-                    report.survivalChanges.Add(
-                        "  -> Критический голод! −15 HP, −15 мораль.");
+                    if (hungerRow.moralePenalty != 0 || hungerRow.healthDamage != 0)
+                    {
+                        character.morale -= hungerRow.moralePenalty;
+                        character.health -= hungerRow.healthDamage;
+                    }
 
-                    if (character.health <= 0)
+                    report.survivalChanges.Add($"  -> {hungerRow.label}.");
+
+                    if (hungerRow.lethal && character.health <= 0)
                     {
                         character.isDead = true;
                         report.deaths.Add(character.fullName);
@@ -294,50 +308,34 @@ public class DayCycleManager : MonoBehaviour
                 if (character.isDead)
                     continue;
                 
-                if (character.daysWithoutWater == 1)
+                var thirstRow = GetPenaltyRow(survivalConfig?.thirstPenalties, character.daysWithoutWater);
+                if (thirstRow != null)
                 {
-                    character.morale -= 5;
-                    report.survivalChanges.Add(
-                        "  -> мораль −5 (жажда 1 день)");
-                }
-                else if (character.daysWithoutWater == 2)
-                {
-                    character.health -= 5;
-                    character.morale -= 10;
-                    report.survivalChanges.Add(
-                        "  -> Обезвоживание: −5 HP, −10 morale.");
-                }
-                else if (character.daysWithoutWater == 3)
-                {
-                    character.health -= 15;
-                    character.morale -= 15;
-                    report.survivalChanges.Add(
-                        "  -> Сильное обезвоживание: −15 HP, −15 morale.");
-                }
-                else if (character.daysWithoutWater >= 4)
-                {
-                    character.health -= 20;
-                    character.morale -= 15;
-                    report.survivalChanges.Add(
-                        "  -> Критическое обезвоживание: −20 HP, −15 morale.");
+                    if (thirstRow.moralePenalty != 0 || thirstRow.healthDamage != 0)
+                    {
+                        character.morale -= thirstRow.moralePenalty;
+                        character.health -= thirstRow.healthDamage;
+                    }
 
-                    if (character.health <= 0)
+                    report.survivalChanges.Add($"  -> {thirstRow.label}.");
+
+                    if (thirstRow.lethal && character.health <= 0)
                     {
                         character.isDead = true;
                         report.deaths.Add(character.fullName);
                     }
                 }
                 
-                if (!character.isDead && resources.TemperatureLevel <= 1)
+                if (!character.isDead && IsFreezing(resources.TemperatureLevel))
                 {
-                    int coldDamage =
-                        resources.TemperatureLevel == 0 ? 30 : 15;
+                    int coldDamage = GetColdDamage(resources.TemperatureLevel);
+                    int coldMorale = survivalConfig != null ? survivalConfig.coldMoralePenalty : 10;
 
                     character.health -= coldDamage;
-                    character.morale -= 10;
+                    character.morale -= coldMorale;
 
                     report.survivalChanges.Add(
-                        $"  -> Мороз, −{coldDamage} HP, −10 мораль.");
+                        $"  -> Мороз, −{coldDamage} HP, −{coldMorale} мораль.");
 
                     if (character.health <= 0)
                     {
@@ -429,7 +427,7 @@ public class DayCycleManager : MonoBehaviour
             if (IsCharacterOnExpedition(character))
                 continue;
 
-            int penalty = baseMoralePenaltyPerDeath * report.deaths.Count * populationMultiplier;
+            int penalty = BaseMoralePenaltyPerDeath * report.deaths.Count * populationMultiplier;
             character.morale -= penalty;
 
             report.survivalChanges.Add(
@@ -492,5 +490,47 @@ public class DayCycleManager : MonoBehaviour
         return $"{character.fullName}: {foodState}, {waterState}, " +
                $"{character.health} HP, мораль {character.morale} " +
                $"({healthState}).";
+    }
+
+    private SurvivalConfig.SurvivalPenaltyRow GetPenaltyRow(
+        List<SurvivalConfig.SurvivalPenaltyRow> rows,
+        int daysWithout)
+    {
+        if (rows == null || rows.Count == 0)
+            return null;
+
+        SurvivalConfig.SurvivalPenaltyRow best = null;
+
+        foreach (var row in rows)
+        {
+            if (row == null) continue;
+
+            // Точное совпадение дня — приоритет.
+            if (row.day == daysWithout)
+                return row;
+
+            // Иначе самая поздняя подходящая строка действует каждый последующий день.
+            if (row.day <= daysWithout &&
+                (best == null || row.day > best.day))
+                best = row;
+        }
+
+        return best;
+    }
+
+    private bool IsFreezing(int temperatureLevel)
+    {
+        if (survivalConfig != null)
+            return temperatureLevel <= survivalConfig.freezingTemperatureThreshold;
+
+        return temperatureLevel <= 1;
+    }
+
+    private int GetColdDamage(int temperatureLevel)
+    {
+        if (survivalConfig != null)
+            return temperatureLevel == 0 ? survivalConfig.coldDamageAtZero : survivalConfig.coldDamageLow;
+
+        return temperatureLevel == 0 ? 30 : 15;
     }
 }

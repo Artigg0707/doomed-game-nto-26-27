@@ -61,4 +61,82 @@ public class ExpeditionLocationData : ScriptableObject
     [Header("Possible Rewards")]
     public List<ExpeditionRewardData> possibleRewards =
         new List<ExpeditionRewardData>();
+
+    private void OnValidate() => Validate();
+
+    public bool Validate()
+    {
+        bool valid = true;
+
+        valid &= ClampPercent(ref deathChancePercent, nameof(deathChancePercent),
+            "шанс смерти должен быть 0..100");
+        valid &= ClampPercent(ref injuryChancePercent, nameof(injuryChancePercent),
+            "шанс ранения должен быть 0..100");
+
+        if (minCooldownDays < 1)
+        {
+            int before = minCooldownDays;
+            minCooldownDays = 1;
+            Debug.LogWarning(
+                $"[ExpeditionLocationData] {name}: minCooldownDays = {before} < 1. Установлено 1.", this);
+            valid = false;
+        }
+
+        if (maxCooldownDays < 1)
+        {
+            int before = maxCooldownDays;
+            maxCooldownDays = 1;
+            Debug.LogWarning(
+                $"[ExpeditionLocationData] {name}: maxCooldownDays = {before} < 1. Установлено 1.", this);
+            valid = false;
+        }
+
+        if (minCooldownDays > maxCooldownDays)
+        {
+            int before = minCooldownDays;
+            minCooldownDays = maxCooldownDays;
+            Debug.LogWarning(
+                $"[ExpeditionLocationData] {name}: minCooldownDays ({before}) > maxCooldownDays ({maxCooldownDays}). " +
+                $"minCooldownDays установлен равным maxCooldownDays.", this);
+            valid = false;
+        }
+
+        if (minInjuryDamage > maxInjuryDamage)
+        {
+            int before = maxInjuryDamage;
+            maxInjuryDamage = minInjuryDamage;
+            Debug.LogWarning(
+                $"[ExpeditionLocationData] {name}: minInjuryDamage ({minInjuryDamage}) > maxInjuryDamage ({before}). " +
+                $"maxInjuryDamage установлен равным minInjuryDamage.", this);
+            valid = false;
+        }
+
+        if (durationDays < 1)
+        {
+            int before = durationDays;
+            durationDays = 1;
+            Debug.LogWarning(
+                $"[ExpeditionLocationData] {name}: durationDays = {before} < 1. Установлено 1.", this);
+            valid = false;
+        }
+
+        return valid;
+    }
+
+    private bool ClampPercent(
+        ref int value,
+        string fieldName,
+        string reason)
+    {
+        if (value < 0 || value > 100)
+        {
+            int before = value;
+            value = Mathf.Clamp(value, 0, 100);
+            Debug.LogWarning(
+                $"[ExpeditionLocationData] {name}: {fieldName} = {before} вне диапазона 0..100 ({reason}). " +
+                $"Установлено {value}.", this);
+            return false;
+        }
+        return true;
+    }
 }

@@ -84,6 +84,31 @@ public class ExpeditionManager : MonoBehaviour
             locationCooldowns = new List<LocationCooldown>();
     }
 
+    private void Start()
+    {
+        if (characterManager == null)
+        {
+            characterManager = GetComponent<CharacterManager>();
+            if (characterManager == null)
+                characterManager = FindObjectOfType<CharacterManager>();
+        }
+
+        if (characterManager == null)
+            Debug.LogError(
+                "[ExpeditionManager] CharacterManager не назначен и не найден на сцене. " +
+                "Вылазки недоступны.", this);
+
+        if (DayCycleManager.Instance == null)
+            Debug.LogWarning(
+                "[ExpeditionManager] DayCycleManager.Instance не найден на сцене. " +
+                "CurrentDay будет считаться равным 1.", this);
+
+        if (activeExpeditions == null)
+            activeExpeditions = new List<ExpeditionRun>();
+        if (locationCooldowns == null)
+            locationCooldowns = new List<LocationCooldown>();
+    }
+
     public ExpeditionRun GetActiveExpeditionAt(int index)
     {
         if (activeExpeditions == null ||
