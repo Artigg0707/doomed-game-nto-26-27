@@ -31,11 +31,10 @@ public class EventManager : MonoBehaviour
             if (loaded.Length > 0)
             {
                 notes.AddRange(loaded);
-                Debug.Log($"[EventManager] Auto-loaded notes from Resources: {loaded.Length}");
             }
         }
 
-        // Check notes that should be active on the current starting day (not only on day change)
+       
         if (DayCycleManager.Instance != null)
         {
             OnNewDay(DayCycleManager.Instance.CurrentDay);
@@ -60,12 +59,11 @@ public class EventManager : MonoBehaviour
             {
                 _activeNote = note;
                 scheduledFound = true;
-                Debug.Log($"[EventManager] Scheduled note activated for day {day}: {note.title}");
                 break;
             }
         }
 
-        // Random notes are checked ONLY if no scheduled note was found for today
+        
         if (!scheduledFound)
         {
             foreach (var note in notes)
@@ -75,7 +73,6 @@ public class EventManager : MonoBehaviour
                     if (UnityEngine.Random.Range(0, 100) < note.randomChance)
                     {
                         _activeNote = note;
-                        Debug.Log($"[EventManager] Random note triggered on day {day}: {note.title}");
                         break;
                     }
                 }
@@ -97,7 +94,6 @@ public class EventManager : MonoBehaviour
     {
         _noteResolvedToday = true;
         _activeNote = null;
-        Debug.Log("[EventManager] Note resolved");
     }
 
     public List<string> GetMorningLinesForDay(int day)

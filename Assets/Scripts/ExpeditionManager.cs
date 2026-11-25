@@ -281,7 +281,6 @@ public class ExpeditionManager : MonoBehaviour
             if (report != null && report.expeditionReturns != null)
                 report.expeditionReturns.Add(returnMessage);
 
-            Debug.Log(returnMessage);
             activeExpeditions.RemoveAt(i);
         }
 

@@ -15,14 +15,14 @@ public class InteractDoor : MonoBehaviour, IInteractable, IHighlightable
 
     void Start()
     {
-        // 1. Сначала пробуем материал из сериализованного поля (назначить в инспекторе: Out Line Mat.mat)
+        
         if (outlineMaterial != null)
         {
             _outlineMaterial = outlineMaterial;
         }
         else
         {
-            // 2. Иначе ищем у рендерера двери
+            
             var renderer = GetComponentInChildren<Renderer>(true);
             if (renderer != null)
             {

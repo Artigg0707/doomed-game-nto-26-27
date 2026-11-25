@@ -125,19 +125,16 @@ public class BedSleepTrigger : MonoBehaviour
         if (playerMove != null)
         {
             playerMove.enabled = false;
-            Debug.Log("[BedSleepTrigger] PlayerMove отключён.");
         }
 
         var interactor = FindObjectOfType<Interactor>();
         if (interactor != null)
         {
             interactor.enabled = false;
-            Debug.Log("[BedSleepTrigger] Interactor отключён.");
         }
         
         if (fadePanel != null)
         {
-            Debug.Log("[BedSleepTrigger] Fade to black...");
             fadePanel.blocksRaycasts = true;
             fadePanel.interactable = true;
 
@@ -149,14 +146,12 @@ public class BedSleepTrigger : MonoBehaviour
                 yield return null;
             }
             fadePanel.alpha = 1f;
-            Debug.Log("[BedSleepTrigger] Экран полностью чёрный.");
         }
         else
         {
             Debug.LogWarning("[BedSleepTrigger] FadePanel не назначен! Переход будет мгновенным.");
         }
         
-        Debug.Log("[BedSleepTrigger] Вызов DayCycleManager.StartNextDay()...");
         DayCycleManager.Instance.StartNextDay();
 
         yield return new WaitForSeconds(0.3f);
@@ -298,8 +293,6 @@ public class BedSleepTrigger : MonoBehaviour
                 }
             }
 
-            Debug.Log("[BedSleepTrigger] Показываем панель утренней сводки.");
-
             var reportPanel = morningReportPanel != null ? morningReportPanel : MorningReportPanel.Instance;
             if (reportPanel != null)
             {
@@ -341,8 +334,6 @@ public class BedSleepTrigger : MonoBehaviour
 
     private void OnSummaryContinued()
     {
-        Debug.Log("[BedSleepTrigger] Начало Fade In (возврат к игре).");
-
         if (fadePanel != null)
         {
             StartCoroutine(FadeInRoutine());
@@ -355,7 +346,6 @@ public class BedSleepTrigger : MonoBehaviour
 
     private IEnumerator FadeInRoutine()
     {
-        Debug.Log("[BedSleepTrigger] Fade In запущен.");
         float startAlpha = fadePanel != null ? fadePanel.alpha : 1f;
         float t = 0;
         while (t < fadeDuration)
@@ -367,13 +357,11 @@ public class BedSleepTrigger : MonoBehaviour
         }
         if (fadePanel != null)
             fadePanel.alpha = 0f;
-        Debug.Log("[BedSleepTrigger] Экран полностью прозрачный.");
         FinishSleep();
     }
 
     private IEnumerator FadeOutRoutine()
     {
-        Debug.Log("[BedSleepTrigger] Fade Out запущен (скрываем черный экран).");
         float t = 0;
         while (t < fadeDuration)
         {
@@ -384,27 +372,22 @@ public class BedSleepTrigger : MonoBehaviour
         }
         if (fadePanel != null)
             fadePanel.alpha = 0f;
-        Debug.Log("[BedSleepTrigger] Черный экран скрыт, сводка видна.");
     }
 
     private void FinishSleep()
     {
-        Debug.Log("[BedSleepTrigger] Завершение сна, возврат управления.");
-
         morningReportPanel?.Hide();
 
         var playerMove = FindObjectOfType<PlayerMove>();
         if (playerMove != null)
         {
             playerMove.enabled = true;
-            Debug.Log("[BedSleepTrigger] PlayerMove включён.");
         }
 
         var interactor = FindObjectOfType<Interactor>();
         if (interactor != null)
         {
             interactor.enabled = true;
-            Debug.Log("[BedSleepTrigger] Interactor включён.");
         }
 
         if (fadePanel != null)
@@ -424,7 +407,6 @@ public class BedSleepTrigger : MonoBehaviour
         if (trigger != null)
         {
             trigger.FinishSleep();
-            Debug.Log("[BedSleepTrigger] Экстренный сброс выполнен.");
         }
         
         var groups = FindObjectsOfType<CanvasGroup>();

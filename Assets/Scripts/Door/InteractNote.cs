@@ -12,7 +12,7 @@ public class InteractNote : MonoBehaviour, IInteractable, IHighlightable
 
     void Start()
     {
-        // Пробуем найти материал обводки на рендерере самой записи
+        
         var renderer = GetComponentInChildren<Renderer>(true);
         if (renderer != null)
         {

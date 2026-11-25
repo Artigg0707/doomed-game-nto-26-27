@@ -153,7 +153,7 @@ public class DayCycleManager : MonoBehaviour
             OnVictory?.Invoke();
         }
 
-        Debug.Log($"Started next day: {CurrentDay}");
+
     }
 
     public bool IsDefeat()

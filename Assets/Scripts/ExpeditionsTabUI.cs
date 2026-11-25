@@ -323,7 +323,6 @@ public class ExpeditionsTabUI : MonoBehaviour
 
     private void HandleExpeditionsChanged()
     {
-        // Обновляем состояние локаций и доступных персонажей.
         BuildLocationButtons(true);
     }
 

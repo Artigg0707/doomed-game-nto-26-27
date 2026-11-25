@@ -9,7 +9,6 @@ public class TestInteract : MonoBehaviour, IInteractable
     }
     public void Interact()
     {
-        Debug.Log(1);
     }
 
     // Update is called once per frame
