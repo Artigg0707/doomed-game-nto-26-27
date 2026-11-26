@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3f8583d9c233bc04ea39720643466129, type: 3}
-  m_Name: SurvivalConfig
+  m_Name: Balance1
   m_EditorClassIdentifier: Assembly-CSharp::SurvivalConfig
   victoryDay: 10
   baseMoralePenaltyPerDeath: 10
@@ -77,5 +77,5 @@ MonoBehaviour:
   expeditionDeathChanceIncreasePerMissingPerson: 5
   expeditionInjuryChanceIncreasePerMissingPerson: 5
   deathChancePercent: 5
-  minCooldownDays: 2
+  minCooldownDays: 1
   maxCooldownDays: 4

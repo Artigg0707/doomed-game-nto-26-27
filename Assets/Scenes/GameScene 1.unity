@@ -2125,7 +2125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c10886fb3e2d54a9445cf22b16b317, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DayCycleManager
-  survivalConfig: {fileID: 11400000, guid: 0bfef59e4e2e1354ab34a5d380443740, type: 2}
+  survivalConfig: {fileID: 11400000, guid: 093b38199d9791741b355528f5f32508, type: 2}
   expeditionManager: {fileID: 161889492}
   characterManager: {fileID: 161889489}
   electricalPanelController: {fileID: 1304211497}
@@ -2149,7 +2149,7 @@ MonoBehaviour:
     temperatureLevel: 0
     generatorBroken: 0
     generatorIsOn: 0
-  survivalConfig: {fileID: 11400000, guid: 0bfef59e4e2e1354ab34a5d380443740, type: 2}
+  survivalConfig: {fileID: 11400000, guid: 093b38199d9791741b355528f5f32508, type: 2}
 --- !u!114 &161889489
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2212,7 +2212,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExpeditionManager
   characterManager: {fileID: 161889489}
-  survivalConfig: {fileID: 11400000, guid: 0bfef59e4e2e1354ab34a5d380443740, type: 2}
+  survivalConfig: {fileID: 11400000, guid: 093b38199d9791741b355528f5f32508, type: 2}
   activeExpeditions: []
   locationCooldowns: []
 --- !u!114 &161889493
@@ -2228,8 +2228,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EventManager
   notes:
-  - {fileID: 11400000, guid: 6042d68ed19e0d64aa77b484ca13abfb, type: 2}
-  - {fileID: 11400000, guid: 21ead694dba185e489b11873946cce4d, type: 2}
   - {fileID: 11400000, guid: 1234567890abcdef1234567890abcdef, type: 2}
 --- !u!1 &165041152
 GameObject:
