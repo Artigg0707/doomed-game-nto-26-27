@@ -23,14 +23,25 @@ public class ExpeditionManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private CharacterManager characterManager;
 
+    [Header("Balance")]
+    [Tooltip("Survival config for expedition parameters. If not assigned, built-in defaults are used.")]
+    [SerializeField] private SurvivalConfig survivalConfig;
+
     [Header("Limits")]
     [Header("Expedition population dependence")]
     [Tooltip("Base population at which expedition is considered safe (no extra chances).")]
-    [SerializeField, Min(1)] private int referencePopulation = 5;
-    [Tooltip("How much death chance on expedition increases per each missing person in bunker (below referencePopulation).")]
-    [SerializeField, Range(0, 100)] private int expeditionDeathChanceIncreasePerMissingPerson = 5;
-    [Tooltip("How much injury chance on expedition increases per each missing person in bunker (below referencePopulation).")]
-    [SerializeField, Range(0, 100)] private int expeditionInjuryChanceIncreasePerMissingPerson = 5;
+
+    
+
+    
+
+    // Read-only properties with survival-config priority; built-in defaults are used if config is missing.
+    private int ReferencePopulation =>
+        survivalConfig != null ? survivalConfig.referencePopulation : 5;
+    private int ExpeditionDeathChanceIncreasePerMissingPerson =>
+        survivalConfig != null ? survivalConfig.expeditionDeathChanceIncreasePerMissingPerson : 5;
+    private int ExpeditionInjuryChanceIncreasePerMissingPerson =>
+        survivalConfig != null ? survivalConfig.expeditionInjuryChanceIncreasePerMissingPerson : 5;
 
     [Header("Runtime state")]
     [SerializeField] private List<ExpeditionRun> activeExpeditions =
@@ -331,12 +342,12 @@ public class ExpeditionManager : MonoBehaviour
             return $"{character.fullName} вернулся(лась), но локация не найдена.";
         
         int aliveInBunker = CountAliveInBunker();
-        int missingPeople = Mathf.Max(0, referencePopulation - aliveInBunker);
+        int missingPeople = Mathf.Max(0, ReferencePopulation - aliveInBunker);
         int adjustedDeathChance = Mathf.Clamp(
-            location.deathChancePercent + missingPeople * expeditionDeathChanceIncreasePerMissingPerson,
+            location.deathChancePercent + missingPeople * ExpeditionDeathChanceIncreasePerMissingPerson,
             0, 100);
         int adjustedInjuryChance = Mathf.Clamp(
-            location.injuryChancePercent + missingPeople * expeditionInjuryChanceIncreasePerMissingPerson,
+            location.injuryChancePercent + missingPeople * ExpeditionInjuryChanceIncreasePerMissingPerson,
             0, 100);
 
         if (RollChance(adjustedDeathChance))

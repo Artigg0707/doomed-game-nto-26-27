@@ -14,6 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SurvivalConfig
   victoryDay: 10
   baseMoralePenaltyPerDeath: 10
+  startFoodMin: 8
+  startFoodMax: 10
+  startWaterMin: 8
+  startWaterMax: 10
+  startFuelMin: 4
+  startFuelMax: 6
+  baseBreakdownChancePercent: 15
+  breakdownChanceForOnePerson: 60
+  breakdownReductionPerAdditionalPerson: 10
   hungerPenalties:
   - day: 1
     moralePenalty: 0
@@ -60,6 +69,13 @@ MonoBehaviour:
   coldDamageAtZero: 30
   coldDamageLow: 15
   coldMoralePenalty: 10
+  baseRepairSuccessChancePercent: 60
+  baseRepairInjuryChancePercent: 25
+  repairFailureDamageHP: 15
+  repairSuccessBonusPerAdditionalPerson: 10
+  referencePopulation: 5
+  expeditionDeathChanceIncreasePerMissingPerson: 5
+  expeditionInjuryChanceIncreasePerMissingPerson: 5
   deathChancePercent: 5
   minCooldownDays: 2
   maxCooldownDays: 4

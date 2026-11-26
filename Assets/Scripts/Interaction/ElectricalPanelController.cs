@@ -10,19 +10,27 @@ public class ElectricalPanelController : MonoBehaviour
     [SerializeField] private CharacterManager characterManager;
     [SerializeField] private ExpeditionManager expeditionManager;
 
-    [Header("Ќастройки генератора")]
-    [SerializeField, Range(0, 100)] private int baseBreakdownChancePercent = 15;
-    [SerializeField, Range(0, 100)] private int baseRepairSuccessChancePercent = 60;
-    [SerializeField, Range(0, 100)] private int baseRepairInjuryChancePercent = 25;
-    [SerializeField] private int repairFailureDamageHP = 15;
+    [Header("Balance")]
+    [Tooltip("Survival config for generator parameters. If not assigned, built-in defaults are used.")]
+    [SerializeField] private SurvivalConfig survivalConfig;
 
-    [Header("«ависимость от численности людей в бункере")]
-    [Tooltip("Ўанс поломки генератора, если в бункере всего 1 живой человек (не на вылазке).")]
-    [SerializeField, Range(0, 100)] private int breakdownChanceForOnePerson = 60;
-    [Tooltip("Ќа сколько уменьшаетс€ шанс поломки за каждого дополнительного живого человека в бункере.")]
-    [SerializeField, Range(0, 100)] private int breakdownReductionPerAdditionalPerson = 10;
-    [Tooltip("Ѕонус к шансу успешного починки генератора за каждого дополнительного живого человека в бункере.")]
-    [SerializeField, Range(0, 100)] private int repairSuccessBonusPerAdditionalPerson = 10;
+    [Header("Ќастройки генератора")]
+
+    // Read-only properties with survival-config priority; built-in defaults are used if config is missing.
+    private int BaseBreakdownChancePercent =>
+        survivalConfig != null ? survivalConfig.baseBreakdownChancePercent : 15;
+    private int BaseRepairSuccessChancePercent =>
+        survivalConfig != null ? survivalConfig.baseRepairSuccessChancePercent : 60;
+    private int BaseRepairInjuryChancePercent =>
+        survivalConfig != null ? survivalConfig.baseRepairInjuryChancePercent : 25;
+    private int BreakdownChanceForOnePerson =>
+        survivalConfig != null ? survivalConfig.breakdownChanceForOnePerson : 60;
+    private int BreakdownReductionPerAdditionalPerson =>
+        survivalConfig != null ? survivalConfig.breakdownReductionPerAdditionalPerson : 10;
+    private int RepairSuccessBonusPerAdditionalPerson =>
+        survivalConfig != null ? survivalConfig.repairSuccessBonusPerAdditionalPerson : 10;
+    private int RepairFailureDamageHP =>
+        survivalConfig != null ? survivalConfig.repairFailureDamageHP : 15;
 
     [Header("—татус")]
     public bool IsGeneratorWorking =>
@@ -202,7 +210,7 @@ public class ElectricalPanelController : MonoBehaviour
 
         GeneratedCharacter character = pendingRepairCharacter;
         int aliveInBunker = CountAliveInBunker();
-        float successChance = baseRepairSuccessChancePercent + (aliveInBunker - 1) * repairSuccessBonusPerAdditionalPerson;
+        float successChance = BaseRepairSuccessChancePercent + (aliveInBunker - 1) * RepairSuccessBonusPerAdditionalPerson;
 
         bool success = UnityEngine.Random.Range(0, 100) < successChance;
 
@@ -217,7 +225,7 @@ public class ElectricalPanelController : MonoBehaviour
         {
             bool canBeInjured = !HasTraitEffect(character, Trait.EffectType.NoInjuryOnGeneratorRepair);
 
-            int injuryChance = baseRepairInjuryChancePercent;
+            int injuryChance = BaseRepairInjuryChancePercent;
             foreach (var trait in character.traits)
             {
                 if (trait == null) continue;
@@ -235,7 +243,7 @@ public class ElectricalPanelController : MonoBehaviour
 
             if (injured)
             {
-                int damage = Mathf.Clamp(repairFailureDamageHP, 0, 100);
+                int damage = Mathf.Clamp(RepairFailureDamageHP, 0, 100);
                 character.health = Mathf.Max(0, character.health - damage);
                 string msg = $"{character.fullName} не смог(ла) починить генератор и получил(а) урон {damage} HP.";
                 report.specialEvents.Add(msg);
@@ -287,9 +295,9 @@ public class ElectricalPanelController : MonoBehaviour
 
         float chance;
         if (aliveInBunker <= 1)
-            chance = breakdownChanceForOnePerson;
+            chance = BreakdownChanceForOnePerson;
         else
-            chance = Mathf.Max(0, breakdownChanceForOnePerson - (aliveInBunker - 1) * breakdownReductionPerAdditionalPerson);
+            chance = Mathf.Max(0, BreakdownChanceForOnePerson - (aliveInBunker - 1) * BreakdownReductionPerAdditionalPerson);
 
         if (characterManager != null && characterManager.characters != null)
         {

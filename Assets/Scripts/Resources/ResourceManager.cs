@@ -7,6 +7,12 @@ public class ResourceManager : MonoBehaviour
 
     public ResourceData resourceData;
 
+    [Header("Balance")]
+    [Tooltip("Survival config for starting resources. If not assigned, built-in defaults are used.")]
+    [SerializeField] private SurvivalConfig survivalConfig;
+
+    public SurvivalConfig SurvivalConfig => survivalConfig;
+
     public int FoodCans => resourceData != null ? resourceData.foodCans : 0;
     public int WaterBottles => resourceData != null ? resourceData.waterBottles : 0;
     public int FuelCans => resourceData != null ? resourceData.fuelCans : 0;
@@ -57,9 +63,9 @@ public class ResourceManager : MonoBehaviour
             resourceData = new ResourceData();
 
         
-        resourceData.foodCans = UnityEngine.Random.Range(8, 11);
-        resourceData.waterBottles = UnityEngine.Random.Range(8, 11);
-        resourceData.fuelCans = UnityEngine.Random.Range(4, 7);
+        resourceData.foodCans = RandomStartValue(survivalConfig?.startFoodMin, survivalConfig?.startFoodMax, 8, 10);
+        resourceData.waterBottles = RandomStartValue(survivalConfig?.startWaterMin, survivalConfig?.startWaterMax, 8, 10);
+        resourceData.fuelCans = RandomStartValue(survivalConfig?.startFuelMin, survivalConfig?.startFuelMax, 4, 6);
         resourceData.temperatureLevel = 3;
         resourceData.generatorBroken = false;
 
@@ -211,5 +217,12 @@ public class ResourceManager : MonoBehaviour
     public void BrokeGenerator()
     {
         BreakGenerator();
+    }
+
+    private int RandomStartValue(int? min, int? max, int defaultMin, int defaultMax)
+    {
+        int lo = min.HasValue ? Mathf.Max(0, min.Value) : defaultMin;
+        int hi = max.HasValue ? Mathf.Max(lo, max.Value) : defaultMax;
+        return UnityEngine.Random.Range(lo, hi + 1);
     }
 }

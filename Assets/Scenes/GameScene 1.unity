@@ -2125,7 +2125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32c10886fb3e2d54a9445cf22b16b317, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DayCycleManager
-  baseMoralePenaltyPerDeath: 10
+  survivalConfig: {fileID: 11400000, guid: 0bfef59e4e2e1354ab34a5d380443740, type: 2}
   expeditionManager: {fileID: 161889492}
   characterManager: {fileID: 161889489}
   electricalPanelController: {fileID: 1304211497}
@@ -2149,6 +2149,7 @@ MonoBehaviour:
     temperatureLevel: 0
     generatorBroken: 0
     generatorIsOn: 0
+  survivalConfig: {fileID: 11400000, guid: 0bfef59e4e2e1354ab34a5d380443740, type: 2}
 --- !u!114 &161889489
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2211,9 +2212,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExpeditionManager
   characterManager: {fileID: 161889489}
-  referencePopulation: 5
-  expeditionDeathChanceIncreasePerMissingPerson: 5
-  expeditionInjuryChanceIncreasePerMissingPerson: 5
+  survivalConfig: {fileID: 11400000, guid: 0bfef59e4e2e1354ab34a5d380443740, type: 2}
   activeExpeditions: []
   locationCooldowns: []
 --- !u!114 &161889493
@@ -2231,6 +2230,7 @@ MonoBehaviour:
   notes:
   - {fileID: 11400000, guid: 6042d68ed19e0d64aa77b484ca13abfb, type: 2}
   - {fileID: 11400000, guid: 21ead694dba185e489b11873946cce4d, type: 2}
+  - {fileID: 11400000, guid: 1234567890abcdef1234567890abcdef, type: 2}
 --- !u!1 &165041152
 GameObject:
   m_ObjectHideFlags: 0
@@ -4649,9 +4649,6 @@ MonoBehaviour:
   daysWithoutFoodText: {fileID: 2121343464}
   daysWithoutWaterText: {fileID: 650307504}
   rationStatusText: {fileID: 0}
-  traitIcon: {fileID: 0}
-  traitNameText: {fileID: 0}
-  traitDescriptionText: {fileID: 0}
   statusText: {fileID: 0}
 --- !u!114 &423377014
 MonoBehaviour:
@@ -8785,8 +8782,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.12306, y: -0.050445557}
-  m_SizeDelta: {x: 478.01, y: 362.53}
+  m_AnchoredPosition: {x: 4.57, y: -0.05000305}
+  m_SizeDelta: {x: 468.65, y: 362.53}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &900453625
 MonoBehaviour:
@@ -11750,13 +11747,7 @@ MonoBehaviour:
   resourceManager: {fileID: 161889488}
   characterManager: {fileID: 161889489}
   expeditionManager: {fileID: 161889492}
-  baseBreakdownChancePercent: 30
-  baseRepairSuccessChancePercent: 60
-  baseRepairInjuryChancePercent: 25
-  repairFailureDamageHP: 15
-  breakdownChanceForOnePerson: 60
-  breakdownReductionPerAdditionalPerson: 10
-  repairSuccessBonusPerAdditionalPerson: 10
+  survivalConfig: {fileID: 11400000, guid: 0bfef59e4e2e1354ab34a5d380443740, type: 2}
 --- !u!1001 &1312474178
 PrefabInstance:
   m_ObjectHideFlags: 0

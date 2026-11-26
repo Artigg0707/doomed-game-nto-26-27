@@ -25,10 +25,7 @@ public class CharacterBioPanelUI : MonoBehaviour
     [Header("Рационы на сегодня")]
     [SerializeField] private TMP_Text rationStatusText;
 
-    [Header("Черта персонажа")]
-    [SerializeField] private Image traitIcon;
-    [SerializeField] private TMP_Text traitNameText;
-    [SerializeField] private TMP_Text traitDescriptionText;
+    
 
     [Header("Статус персонажа")]
     [SerializeField] private TMP_Text statusText;
@@ -100,17 +97,7 @@ public class CharacterBioPanelUI : MonoBehaviour
             ? character.traits[0]
             : null;
 
-        if (traitIcon != null)
-        {
-            traitIcon.sprite = trait != null ? trait.traitSprite : null;
-            traitIcon.enabled = trait != null && trait.traitSprite != null;
-        }
-
-        if (traitNameText != null)
-            traitNameText.text = trait != null ? trait.traitName : "Нет черты";
-
-        if (traitDescriptionText != null)
-            traitDescriptionText.text = trait != null ? trait.traitDesc : "";
+        
 
         if (statusText != null)
         {

@@ -7,18 +7,13 @@ public class DayCycleManager : MonoBehaviour
     [Header("Конфиг выживания")]
     [SerializeField] private SurvivalConfig survivalConfig;
 
-    // Запасное значение — используется только если SurvivalConfig не назначен.
-    // Основные настройки теперь задаются в SurvivalConfig.asset.
-    [SerializeField, Range(0, 50), Tooltip("Запасной штраф морали за смерть, если конфиг не назначен")]
-    private int baseMoralePenaltyPerDeathFallback = 10;
-
     public static DayCycleManager Instance { get; private set; }
 
     private int VictoryDay =>
         survivalConfig != null ? survivalConfig.victoryDay : 10;
 
     private int BaseMoralePenaltyPerDeath =>
-        survivalConfig != null ? survivalConfig.baseMoralePenaltyPerDeath : baseMoralePenaltyPerDeathFallback;
+        survivalConfig != null ? survivalConfig.baseMoralePenaltyPerDeath : 10;
 
     private bool _configMissingWarned;
 
