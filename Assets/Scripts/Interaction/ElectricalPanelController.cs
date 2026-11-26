@@ -51,6 +51,8 @@ public class ElectricalPanelController : MonoBehaviour
 
     public event Action OnResourcesChanged;
     public event Action OnGeneratorStatusChanged;
+
+    public void NotifyGeneratorStatusChanged() => OnGeneratorStatusChanged?.Invoke();
     
     private GeneratedCharacter pendingRepairCharacter;
     private int pendingRepairDaySent = -1;

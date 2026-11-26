@@ -52,6 +52,8 @@ public class ExpeditionManager : MonoBehaviour
 
     public event Action OnExpeditionsChanged;
 
+    public void NotifyExpeditionsChanged() => OnExpeditionsChanged?.Invoke();
+
     public int ActiveExpeditionCount =>
         activeExpeditions != null ? activeExpeditions.Count : 0;
 

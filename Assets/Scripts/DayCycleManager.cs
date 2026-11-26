@@ -28,6 +28,8 @@ public class DayCycleManager : MonoBehaviour
     public event Action OnDefeat;
     public event Action OnVictory;
 
+    public void NotifyDayChanged() => OnDayChanged?.Invoke(CurrentDay);
+
     private void Awake()
     {
         if (Instance != null && Instance != this)

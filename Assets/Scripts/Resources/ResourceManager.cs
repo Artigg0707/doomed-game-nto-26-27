@@ -46,6 +46,8 @@ public class ResourceManager : MonoBehaviour
 
     public event Action OnResourcesChanged;
 
+    public void NotifyResourcesChanged() => OnResourcesChanged?.Invoke();
+
     private const int MinResourceCount = 0;
     private const int MaxTemperatureLevel = 3;
 

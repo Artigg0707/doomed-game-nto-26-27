@@ -10,6 +10,8 @@ public class CharacterManager : MonoBehaviour
 
     public event System.Action OnRationsChanged;
 
+    public void NotifyRationsChanged() => OnRationsChanged?.Invoke();
+
     private void Awake()
     {
         Instance = this;
@@ -162,6 +164,32 @@ public class CharacterManager : MonoBehaviour
 
             character.receivesFoodToday = false;
             character.receivesWaterToday = false;
+        }
+
+        OnRationsChanged?.Invoke();
+    }
+
+    public void ReloadCharacters(List<GeneratedCharacter> newCharacters)
+    {
+        characters.Clear();
+
+        if (cardContainer != null)
+        {
+            var cards = cardContainer.GetComponentsInChildren<CharacterCardUI>(true);
+            foreach (var card in cards)
+            {
+                Destroy(card.gameObject);
+            }
+        }
+
+        if (newCharacters != null)
+        {
+            foreach (var c in newCharacters)
+            {
+                if (c == null) continue;
+                characters.Add(c);
+                CreateCard(c);
+            }
         }
 
         OnRationsChanged?.Invoke();
