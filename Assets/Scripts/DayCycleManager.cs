@@ -21,7 +21,7 @@ public class DayCycleManager : MonoBehaviour
     [SerializeField] private CharacterManager characterManager;
     [SerializeField] private ElectricalPanelController electricalPanelController;
 
-    public int CurrentDay { get; private set; } = 1;
+    public int CurrentDay { get; private set; } = 0;
 
     public event Action<int> OnDayChanged;
     public event Action<NightReportData> OnNightComplete;
@@ -56,10 +56,10 @@ public class DayCycleManager : MonoBehaviour
 
         if (resources != null && resources.resourceData != null)
         {
-            if (resources.resourceData.currentDay > 0)
+            if (resources.resourceData.currentDay > -1)
                 CurrentDay = resources.resourceData.currentDay;
             else
-                resources.resourceData.currentDay = 1;
+                resources.resourceData.currentDay = 0;
         }
 
         if (survivalConfig == null)

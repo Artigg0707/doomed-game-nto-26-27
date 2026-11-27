@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerMove : MonoBehaviour
 {
-    
+
     public float speed;
     
     public CharacterController controller;
