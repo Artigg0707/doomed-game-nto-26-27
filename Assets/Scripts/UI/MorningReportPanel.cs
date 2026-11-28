@@ -104,11 +104,11 @@ public class MorningReportPanel : MonoBehaviour
         if (r.resourceChanges.Count > 0)
         {
             foreach (var m in r.resourceChanges)
-                sb.AppendLine("► " + m);
+                sb.AppendLine("- " + m);
         }
         else
         {
-            sb.AppendLine("► Без изменений.");
+            sb.AppendLine("- Без изменений.");
         }
 
         sb.AppendLine();
@@ -118,20 +118,20 @@ public class MorningReportPanel : MonoBehaviour
         if (r.survivalChanges.Count > 0)
         {
             foreach (var m in r.survivalChanges)
-                sb.AppendLine("► " + m);
+                sb.AppendLine("- " + m);
         }
         else
         {
-            sb.AppendLine("► Нет жителей в бункере.");
+            sb.AppendLine("- Нет жителей в бункере.");
         }
 
         
         foreach (var d in r.deaths)
-            sb.AppendLine($"► {d} не выжил.");
+            sb.AppendLine($"- {d} не выжил.");
 
         
         foreach (var d in r.departures)
-            sb.AppendLine($"► {d} ушёл из бункера, не выдержав происходящего.");
+            sb.AppendLine($"- {d} ушёл из бункера, не выдержав происходящего.");
 
        
         if (r.expeditionReturns.Count > 0)
@@ -139,7 +139,7 @@ public class MorningReportPanel : MonoBehaviour
             sb.AppendLine();
             sb.AppendLine("Экспедиции:");
             foreach (var e in r.expeditionReturns)
-                sb.AppendLine($"► {e}");
+                sb.AppendLine($"- {e}");
         }
 
         
@@ -148,7 +148,7 @@ public class MorningReportPanel : MonoBehaviour
             sb.AppendLine();
             sb.AppendLine("Особые события:");
             foreach (var e in r.specialEvents)
-                sb.AppendLine($"► {e}");
+                sb.AppendLine($"- {e}");
         }
 
         sb.AppendLine();
@@ -160,7 +160,7 @@ public class MorningReportPanel : MonoBehaviour
 
         sb.AppendLine();
         sb.AppendLine("Заметка коменданта:");
-        sb.AppendLine("► " + GetCommandantComment(r));
+        sb.AppendLine("- " + GetCommandantComment(r));
 
         return sb.ToString();
     }
